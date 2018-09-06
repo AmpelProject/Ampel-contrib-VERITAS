@@ -1,0 +1,296 @@
+{
+    "CosmologySummary": {
+      "active": true,
+      "schedule": "every().day.at('13:00')",
+      "onError": {
+        "sendMail": {
+          "to": "ztf-software@desy.de",
+          "excStack": true
+        },
+        "stopAmpel": false,
+        "retry": false
+      },
+      "input": {
+        "select": {
+          "created" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -40
+                    }
+                }
+            },
+            "modified" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -1
+                    }
+                }
+            },
+            "channel(s)": [
+              "HU_GP_CLEAN"
+            ],
+            "withFlag(s)": "INST_ZTF",
+            "withoutFlag(s)": "HAS_ERROR"
+        },
+        "load": {
+          "state": "$latest",
+          "doc(s)": [
+            "TRANSIENT",
+            "COMPOUND",
+            "T2RECORD",
+            "PHOTOPOINT"
+          ],
+          "t2(s)": [
+            "SNCOSMO",
+            "CATALOGMATCH"
+          ],
+          "verbose": true
+        },
+        "chunk": 200
+      },
+      "task(s)": [
+        {
+          "name": "HUCleanToSlack",
+          "t3Unit": "SlackSummaryPublisher",
+          "runConfig": "HUCleanToSlack",
+          "updateJournal": false,
+          "select": {
+            "channel(s)": [
+              "HU_GP_CLEAN"
+            ],
+            "state(s)": "$latest",
+            "t2(s)": [
+              "SNCOSMO",
+              "CATALOGMATCH"
+            ]
+          }
+        },
+        {
+          "name" : "Fredrik",
+          "t3Unit" : "MarshalPublisher",
+          "runConfig" : "test",
+          "updateJournal" : false,
+          "select" : {
+            "state" : "$latest",
+            "channel(s)" : [
+              "HU_GP_CLEAN"
+            ]
+          }
+        }
+      ]
+    },
+
+    "LensingSummary": {
+      "active": true,
+      "schedule": "every().day.at('13:00')",
+      "onError": {
+        "sendMail": {
+          "to": "ztf-software@desy.de",
+          "excStack": true
+        },
+        "stopAmpel": false,
+        "retry": false
+      },
+      "input": {
+        "select": {
+          "created" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -40
+                    }
+                }
+            },
+            "modified" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -1
+                    }
+                }
+            },
+            "channel(s)": [
+              "OKC_LENSED",
+              "TRANSIENTS_IN_ELLIPTICAL"
+            ],
+            "withFlag(s)": "INST_ZTF",
+            "withoutFlag(s)": "HAS_ERROR"
+        },
+        "load": {
+          "state": "$latest",
+          "doc(s)": [
+            "TRANSIENT",
+            "COMPOUND",
+            "T2RECORD",
+            "PHOTOPOINT"
+          ],
+          "t2(s)": [
+            "SNCOSMO"
+          ],
+          "verbose": true
+        },
+        "chunk": 200
+      },
+      "task(s)": [
+        {
+          "name": "Llllllensing",
+          "t3Unit": "SlackSummaryPublisher",
+          "runConfig": "Lensing",
+          "updateJournal": false,
+          "select": {
+            "channel(s)": [
+              "OKC_LENSED",
+              "TRANSIENTS_IN_ELLIPTICAL"
+            ],
+            "state(s)": "$latest",
+            "t2(s)": "SNCOSMO"
+          }
+        },
+        {
+          "name": "LlllllensingMarshal",
+          "t3Unit": "MarshalPublisher",
+          "runConfig": "Lensing",
+          "updateJournal": false,
+          "select": {
+            "channel(s)": [
+              "OKC_LENSED",
+              "TRANSIENTS_IN_ELLIPTICAL"
+            ]
+          }
+        }
+      ]
+    },
+
+    "XshooterSummary": {
+      "active": true,
+      "schedule": [
+	"every().day.at('05:00')",
+	"every().day.at('06:00')",
+	"every().day.at('07:00')"
+	],
+      "onError": {
+        "sendMail": {
+          "to": "ztf-software@desy.de",
+          "excStack": true
+        },
+        "stopAmpel": false,
+        "retry": false
+      },
+      "input": {
+        "select": {
+          "created" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -0.5
+                    }
+                }
+            },
+            "modified" : {
+                "after" : {
+                    "use": "$lastRunTime",
+                    "jobName": "XshooterSummary"
+                }
+            },
+            "channel(s)": [
+              "HU_XSHOOTER_RRM"
+            ],
+            "withFlag(s)": "INST_ZTF",
+            "withoutFlag(s)": "HAS_ERROR"
+        },
+        "load": {
+          "state": "$latest",
+          "doc(s)": [
+            "TRANSIENT",
+            "COMPOUND",
+            "T2RECORD",
+            "PHOTOPOINT"
+          ],
+          "t2(s)": [
+            "SNCOSMO",
+            "CATALOGMATCH"
+          ],
+          "verbose": true
+        },
+        "chunk": 200
+      },
+      "task(s)": [
+        {
+          "name": "Jesper",
+          "t3Unit": "SlackSummaryPublisher",
+          "runConfig": "ZTFIaRapid",
+          "updateJournal": false,
+          "select": {
+            "state(s)": "$latest",
+            "t2(s)": [ "SNCOSMO", "CATALOGMATCH" ]
+          }
+        }
+      ]
+    },
+
+
+    "ToOSummary": {
+      "active": true,
+      "schedule": "every(30).minutes",
+      "onError": {
+        "sendMail": {
+          "to": "ztf-software@desy.de",
+          "excStack": true
+        },
+        "stopAmpel": false,
+        "retry": false
+      },
+      "input": {
+        "select": {
+          "created" : {
+                "after" : {
+                    "use": "$timeDelta",
+                    "arguments" : {
+                        "days": -40
+                    }
+                }
+            },
+            "modified" : {
+                "after" : {
+                    "use": "$lastRunTime",
+                    "jobName": "ToOSummary"
+                }
+            },
+            "channel(s)": [
+              "DESY_TOO_TEST"
+            ],
+            "withFlag(s)": "INST_ZTF",
+            "withoutFlag(s)": "HAS_ERROR"
+        },
+        "load": {
+          "state": "$latest",
+          "doc(s)": [
+            "TRANSIENT",
+            "COMPOUND",
+            "T2RECORD",
+            "PHOTOPOINT"
+          ],
+          "t2(s)": [
+            "SNCOSMO",
+            "CATALOGMATCH"
+          ],
+          "verbose": true
+        },
+        "chunk": 200
+      },
+      "task(s)": [
+        {
+          "name": "ToOUpdate",
+          "t3Unit": "SlackSummaryPublisher",
+          "runConfig": "ToO",
+          "updateJournal": false,
+          "select": {
+            "state(s)": "$latest",
+            "t2(s)": "SNCOSMO"
+          }
+        }
+      ]
+    }
+}
