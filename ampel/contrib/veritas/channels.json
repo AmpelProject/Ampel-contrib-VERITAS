@@ -1,0 +1,34 @@
+{
+    
+    "VERITAS_BLAZARS": {
+    "version" : 1.0,
+    "active" : true,
+    "sources" : {
+        "ZTFIPAC" : {
+            "parameters" : {
+                "ZTFPartner" : false,
+                "autoComplete" : false,
+                "updatedHUZP" : false
+            },
+            "t0Filter" : {
+                "id" : "VeritasBlazarFilter",
+                "runConfig": {
+                    "MIN_RB": 0.3,
+                    "3FHL_RS_ARCSEC": 2,
+                    "MIN_MAG": 18.5
+                }
+            },
+            "t2Compute" : [ 
+                    {
+                    "t2Unit" : "SNCOSMO",
+                    "runConfig" : "default"
+                    },
+                    {
+                    "t2Unit" : "CATALOGMATCH",
+                    "runConfig": "sdss_class"
+                    }
+                ]
+            }
+        }
+    }
+}
