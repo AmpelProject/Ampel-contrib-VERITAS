@@ -14,6 +14,3 @@ def load_t3_jobs():
 	with open(join(dirname(__file__), "t3_jobs.json")) as f:
 		return json.load(f)
 
-def load_t3_run_configs():
-	with open(join(dirname(__file__), "t3_run_config.json")) as f:
-		return json.load(f)

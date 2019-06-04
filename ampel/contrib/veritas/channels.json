@@ -1,31 +1,38 @@
 {
     
-    "VERITAS_BLAZARS": {
+    "channel": "VERITAS_BLAZARS",
     "version" : 1.0,
     "active" : true,
     "sources" : {
-        "ZTFIPAC" : {
+            "stream": "ZTFIPAC",
             "parameters" : {
                 "ZTFPartner" : false,
                 "autoComplete" : false,
                 "updatedHUZP" : false
             },
             "t0Filter" : {
-                "id" : "VeritasBlazarFilter",
+                "unitId" : "VeritasBlazarFilter",
                 "runConfig": {
+                    "MIN_NDET": 2,
                     "MIN_RB": 0.3,
-                    "3FHL_RS_ARCSEC": 2,
-                    "MIN_MAG": 18.5
+                    "RS_ARCSEC": 3,
+                    "MIN_MAG": 14,
+					"MAX_MAG": 18.5,
+					"SCORR": 9,
+					"SSNRMS": 9,
+					"SHARPNESS": -1,
+					"DIST_PSNR1": 0.3,
+					"SGS_SCORE1": 0.5
                 }
             },
             "t2Compute" : [ 
                     {
-                    "t2Unit" : "SNCOSMO",
-                    "runConfig" : "default"
+                    "t2Unit" : "POLYFIT",
+                    "runConfig" : "dynamic"
                     },
                     {
                     "t2Unit" : "CATALOGMATCH",
-                    "runConfig": "sdss_class"
+                    "runConfig": "general"
                     }
                 ]
             }

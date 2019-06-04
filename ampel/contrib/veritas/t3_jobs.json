@@ -1,2 +1,38 @@
 {
+    "jobs": "SlackSummaryPublisher",
+	"schedule": "every().hour",
+	"transients": {
+		"select": {
+			"scienceRecords": {
+				"unitId": "CATALOGMATCH",
+				"runConfig": "general",
+				"match": {
+					
+    "mycols": [
+      "ztf_name",
+      "ra",
+      "dec",
+      "magpsf",
+      "sgscore1",
+      "rb",
+      "most_recent_detection",
+      "first_detection",
+      "n_detections",
+      "distnr",
+      "distpsnr1",
+      "isdiffpos",
+      "_id"
+    ],
+    "channel(s)": [
+      "VERITAS_BLAZARS"
+    ],
+    "excitement_levels": {
+      "Low": 50,
+      "Mid": 200,
+      "High": 400
+    },
+    "Slack_token": "xoxp-430378314450-643299264339-643305800547-31a08f0128fae774808b4b8f23ac9c34",
+    "Slack_channel": "#ztf_alerts",
+    "full_photometry": true
+  }
 }

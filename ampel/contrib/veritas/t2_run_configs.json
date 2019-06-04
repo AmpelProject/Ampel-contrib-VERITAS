@@ -1,2 +1,79 @@
 {
+	"POLYFIT_dynamic": { 
+        "t2Unit": "POLYFIT",
+        "runConfig": "dynamic",
+        "author": "mireia.nievas-rosillo@desy.de",
+        "version": 1.0,
+        "lastChange": "04.06.2019",
+        "private": false,
+        "parameters": {
+            "max_order": 2
+        }
+    },
+    "CATALOGMATCH_vheblazars": {
+        "t2Unit": "CATALOGMATCH",
+        "runConfig": "general",
+        "author": "ampel-info@desy.de",
+        "version": 1.0,
+        "lastChange": "11.09.2018",
+        "private": false,
+        "parameters": {
+            "catalogs": {
+                "GammaCAT":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                },
+                "3FHL":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                },
+                "4FGL":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                },
+                "2WHSP":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                },
+                "RomaBZCAT":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                },
+                "XRaySelBLL":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "ra",
+                                    "dec_key": "dec"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC"]
+                }
+            }
+        }
+    }
 }

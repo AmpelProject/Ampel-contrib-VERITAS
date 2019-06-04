@@ -14,21 +14,21 @@ class extcatsURI(ResourceURI):
     @classmethod
     def get_default(cls):
         return dict(scheme='mongodb', hostname='localhost', port=27017)
-    
-    def __call__(self):
-        return self.uri
 
-class catsHTMPath(ResourceURI):
+class catsHTMURI(ResourceURI):
     
     name = "catsHTM"
-    fields = ('path',)
+    fields = ('hostname', 'port')
     
     @classmethod
     def get_default(cls):
-        return dict(scheme='file')
-    
-    def __call__(self):
-        return urlparse(self.uri).path
+        return dict(scheme='tcp', hostname='localhost', port=27025)
+
+    @classmethod
+    def parse_args(cls, args):
+        uris = super(catsHTMURI, cls).parse_args(args)
+        # strip trailing slash to keep zeromq happy
+        return {k: v[:-1] for k,v in uris.items()}
 
 class desyCloudURI(ResourceURI):
 
@@ -38,6 +38,3 @@ class desyCloudURI(ResourceURI):
     @classmethod
     def get_default(cls):
         return dict(scheme='https', hostname='desycloud.desy.de', path='remote.php/webdav')
-
-    def __call__(self):
-        return self.uri
