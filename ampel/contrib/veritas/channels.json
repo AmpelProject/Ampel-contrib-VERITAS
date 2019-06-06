@@ -1,38 +1,39 @@
-{
-    "channel": "VERITAS_BLAZARS",
-    "version" : 1.0,
-    "active" : true,
-    "sources" : {
-		"stream": "ZTFIPAC",
-		"parameters" : {
-			"ZTFPartner" : false,
-			"autoComplete" : false,
-			"updatedHUZP" : false
-		},
-		"t0Filter" : {
-			"unitId" : "VeritasBlazarFilter",
-			"runConfig": {
-				"MIN_NDET": 2,
-				"MIN_RB": 0.3,
-				"RS_ARCSEC": 3,
-				"MIN_MAG": 14,
-				"MAX_MAG": 18.5,
-				"SCORR": 9,
-				"SSNRMS": 9,
-				"SHARPNESS": -1,
-				"DIST_PSNR1": 0.3,
-				"SGS_SCORE1": 0.5
-			}
-		},
-		"t2Compute" : [ 
-			{
-				"t2Unit" : "T2BlazarProducts",
-				"runConfig" : "dynamic"
+[
+	{
+		"channel": "VERITAS_BLAZARS",
+		"sources" : {
+			"stream": "ZTFIPAC",
+			"parameters" : {
+				"ZTFPartner" : false,
+				"autoComplete" : "live",
+				"updatedHUZP" : false
 			},
-			{
-				"t2Unit" : "T2CatalogMatch",
-				"runConfig": "general"
-			}
-		]
-    }
-}
+			"t0Filter" : {
+				"unitId" : "VeritasBlazarFilter",
+				"runConfig": {
+					"MIN_NDET": 0,
+					"MIN_RB": 0.3,
+					"RS_ARCSEC": 1800,
+					"MIN_MAG": 10,
+					"MAX_MAG": 18.5,
+					"SCORR": 0,
+					"SSNRMS": 0,
+					"SHARPNESS": -1,
+					"DIST_PSNR1": 0.3,
+					"SGS_SCORE1": 0.5,
+					"CATALOGS ": "GammaCAT, 3FHL"
+				}
+			},
+			"t2Compute" : [
+					{
+						"unitId" : "T2BLAZARPRODUTCS",
+						"runConfig": "dynamic"
+					},
+					{
+						"unitId" : "CATALOGMATCH",
+						"runConfig": "vheblazars"
+					}
+				]
+		}
+	}
+]

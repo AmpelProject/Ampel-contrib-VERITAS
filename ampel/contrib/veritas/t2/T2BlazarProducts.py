@@ -4,7 +4,7 @@ import itertools
 from pydantic import BaseModel
 #from ampel.abstract.AbsT2Unit import AbsT2Unit
 
-class T2BlazarProducts():
+class T2BlazarProducts(AbsT2Unit):
     
     version = 1.0
     author = "mireia.nievas-rosillo@desy.de"
@@ -279,29 +279,29 @@ class T2BlazarProducts():
         self.max_jd = np.max(light_curve.get_values('jd'))
         self.classify_in_filters(light_curve)
         
-        self.figure = plt.figure(figsize=(6,4.2))
-        subplot_phot  = self.figure.add_subplot(2,1,1)
-        subplot_color = self.figure.add_subplot(2,1,2,sharex=subplot_phot)
+#        self.figure = plt.figure(figsize=(6,4.2))
+#        subplot_phot  = self.figure.add_subplot(2,1,1)
+#        subplot_color = self.figure.add_subplot(2,1,2,sharex=subplot_phot)
         
         for color in self.available_colors:
             photresult = self.photometry_estimation(color)
             if photresult is None: continue
-            self.figure = self.plot_trend(photresult,
-                fig=self.figure,ax=subplot_phot,
-                color=self.colordict[color],fit=True)
+#            self.figure = self.plot_trend(photresult,
+#                fig=self.figure,ax=subplot_phot,
+#                color=self.colordict[color],fit=True)
         
         for (color1,color2) in itertools.combinations(\
             self.available_colors,2):
             colorresult=self.color_estimation(\
                     color1,color2,max_jdtimediff=1)
             if colorresult is None: continue
-            self.figure = self.plot_trend(colorresult,
-                fig=self.figure,ax=subplot_color,
-                color=self.colordict[color],fit=True)
+#            self.figure = self.plot_trend(colorresult,
+#                fig=self.figure,ax=subplot_color,
+#                color=self.colordict[color],fit=True)
         
         ### Revert photometric magnitude y-axis.
-        subplot_phot.set_ylim(subplot_phot.get_ylim()[1]*1.05,
-                              subplot_phot.get_ylim()[0]*0.95)
+#        subplot_phot.set_ylim(subplot_phot.get_ylim()[1]*1.05,
+#                              subplot_phot.get_ylim()[0]*0.95)
         
         
         return(self.results)

@@ -10,6 +10,7 @@
 import sys
 import numpy as np
 import logging
+from pymongo import MongoClient
 from urllib.parse import urlparse
 from extcats import CatalogQuery
 from astropy.coordinates import SkyCoord
@@ -32,7 +33,6 @@ class VeritasBlazarFilter(AbsAlertFilter):
         """
         Necessary class to validate the configuration
         """
-
         MIN_NDET        : int   = 3    # number of previous detections
         MIN_RB          : float = 0.60 # real bogus score
         MIN_MAG         : float = 13.0 # brightness threshold [mag]
@@ -45,10 +45,10 @@ class VeritasBlazarFilter(AbsAlertFilter):
         SGS_SCORE1      : float = 0.5  # how likely it is that src to be a star.
         CATALOGS        : str   = "GammaCAT, 3FHL" # comma-separated list of catalogs
 
-    def __init__(self, on_match_t2_units=["POLYFIT"], base_config=None, run_config=None, logger=None):
+    def __init__(self, on_match_t2_units, base_config=None, run_config=None, logger=None):
         """
         """
-        if run_config is None or len(run_config) == 0:
+        if run_config is None or len(run_config.dict()) == 0:
             raise ValueError("Please check you run configuration")
         
         self.keys_to_check = ('ndet', 'ra', 'dec', 'rb', 'scorr', 'ssnrms', 
@@ -62,12 +62,9 @@ class VeritasBlazarFilter(AbsAlertFilter):
         rc_dict = run_config.dict()
         for k, val in rc_dict.items():
             self.logger.info("Using %s=%s" % (k, val))
-
-        for k,val in rc_dict.items():
-            self.logger.info("Using %s=%s" % (el, run_config[el]))
         
         # ----- set filter properties ----- #
-        self.min_ndet                          = rc_dict['MIN_NDIT']
+        self.min_ndet                          = rc_dict['MIN_NDET']
         self.rs_arcsec                         = rc_dict['RS_ARCSEC']
         self.rb_th                             = rc_dict['MIN_RB']
         self.min_mag                           = rc_dict['MIN_MAG']
