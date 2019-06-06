@@ -1,6 +1,6 @@
 {
 	"POLYFIT_dynamic": { 
-        "t2Unit": "POLYFIT",
+        "t2Unit": "T2BlazarProducts",
         "runConfig": "dynamic",
         "author": "mireia.nievas-rosillo@desy.de",
         "version": 1.0,
@@ -11,7 +11,7 @@
         }
     },
     "CATALOGMATCH_vheblazars": {
-        "t2Unit": "CATALOGMATCH",
+        "t2Unit": "T2CatalogMatch",
         "runConfig": "general",
         "author": "ampel-info@desy.de",
         "version": 1.0,
