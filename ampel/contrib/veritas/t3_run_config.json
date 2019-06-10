@@ -1,0 +1,31 @@
+{
+  "SlackSummaryPublisher_Lensing": {
+    "mycols": [
+      "ztf_name",
+      "ra",
+      "dec",
+      "magpsf",
+      "sgscore1",
+      "rb",
+      "most_recent_detection",
+      "first_detection",
+      "n_detections",
+      "distnr",
+      "distpsnr1",
+      "isdiffpos",
+      "_id"
+    ],
+    "channel(s)": [
+      "OKC_LENSED",
+      "TRANSIENTS_IN_ELLIPTICAL"
+    ],
+    "excitement_levels": {
+      "Low": 50,
+      "Mid": 200,
+      "High": 400
+    },
+    "Slack_token": "xoxb-106494213175-397912266598-TOE3sSy3KuyDr6bPIuyO730L",
+    "Slack_channel": "#ztf_lensing",
+    "full_photometry": true
+  }
+}
