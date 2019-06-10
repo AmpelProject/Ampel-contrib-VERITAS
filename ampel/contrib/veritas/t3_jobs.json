@@ -26,11 +26,6 @@
     "channel(s)": [
       "VERITAS_BLAZARS"
     ],
-    "excitement_levels": {
-      "Low": 50,
-      "Mid": 200,
-      "High": 400
-    },
     "Slack_token": "xoxp-430378314450-643299264339-643305800547-31a08f0128fae774808b4b8f23ac9c34",
     "Slack_channel": "#ztf_alerts",
     "full_photometry": true

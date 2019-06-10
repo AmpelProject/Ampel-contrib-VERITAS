@@ -21,7 +21,15 @@
 					"SHARPNESS": -1,
 					"DIST_PSNR1": 0.3,
 					"SGS_SCORE1": 0.5,
-					"CATALOGS ": "GammaCAT, 3FHL"
+					"CATALOGS ": "GammaCAT, 3FHL",
+					"CATALOGS_ARCSEC" : {
+						"GammaCAT": 20,
+						"3FHL": 10,
+						"4FGL": 10,
+						"2WHSP": 3,
+						"RomaBZCAT": 3,
+						"XRaySelBLL": 3
+					}
 				}
 			},
 			"t2Compute" : [

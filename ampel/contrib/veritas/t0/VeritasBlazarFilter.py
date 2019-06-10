@@ -39,11 +39,17 @@ class VeritasBlazarFilter(AbsAlertFilter):
         MAX_MAG         : float = 18.5 # brightness threshold [mag]
         SCORR           : float = 25.0 # peak pixel signal-to-noise ratio
         SSNRMS          : float = 25.0 # S/stddev(S) where S=conv(D,PSF)
-        RS_ARCSEC       : float = 2    # search radius around 3FHL sources [arcsec]
         SHARPNESS       : float = -1   # star-like ~ 0, CRs < 0, extended > 0
         DIST_PSNR1      : float = 0.3  # distance to closest src of PS1 catalog.
         SGS_SCORE1      : float = 0.5  # how likely it is that src to be a star.
-        CATALOGS        : str   = "GammaCAT, 3FHL" # comma-separated list of catalogs
+        CATALOGS_ARCSEC : dict  = {
+            "GammaCAT": 20,
+            "3FHL": 10,
+            "4FGL": 10,
+            "2WHSP": 3,
+            "RomaBZCAT": 3,
+            "XRaySelBLL": 3
+        }
 
     def __init__(self, on_match_t2_units, base_config=None, run_config=None, logger=None):
         """
@@ -65,7 +71,6 @@ class VeritasBlazarFilter(AbsAlertFilter):
         
         # ----- set filter properties ----- #
         self.min_ndet                          = rc_dict['MIN_NDET']
-        self.rs_arcsec                         = rc_dict['RS_ARCSEC']
         self.rb_th                             = rc_dict['MIN_RB']
         self.min_mag                           = rc_dict['MIN_MAG']
         self.max_mag                           = rc_dict['MAX_MAG']
@@ -74,8 +79,8 @@ class VeritasBlazarFilter(AbsAlertFilter):
         self.max_sharpness                     = rc_dict['SHARPNESS']
         self.max_distpsnr1                     = rc_dict['DIST_PSNR1']
         self.max_sgscore1                      = rc_dict['SGS_SCORE1']
-        self.catalogs  = [cat.strip() for cat in rc_dict['CATALOGS'].split(",")]
-        
+        self.catalogs_arcsec                   = rc_dict['CATALOGS_ARCSEC']
+
         # ----- init the catalog query object for the 3fhl catalog ----- #
         catq_client = MongoClient(base_config['extcats.reader'])
         catq_kwargs = {'logger': self.logger, 'dbclient': catq_client}
@@ -127,14 +132,14 @@ class VeritasBlazarFilter(AbsAlertFilter):
             return None
         
         if latest['scorr'] < self.scorr:
-            self.logger.debug("rejected: SCORR (SNR) score %.2f below threshod (%.2f)" %
+            self.logger.debug("rejected: SCORR (SNR) %.2f < %.2f" %
                 (latest['scorr'], self.scorr))
             self.reason='low_scorr'
             self.rejected_reason[latest['candid']] = self.reason
             return None
         
         if latest['ssnrms'] < self.ssnrms:
-            self.logger.debug("rejected: SSNRMS (SNR) score %.2f below threshod (%.2f)" %
+            self.logger.debug("rejected: SSNRMS (SNR) %.2f < %.2f" %
                 (latest['ssnrms'], self.ssnrms))
             self.reason='low_ssnrms'
             self.rejected_reason[latest['candid']] = self.reason
@@ -142,14 +147,14 @@ class VeritasBlazarFilter(AbsAlertFilter):
 
         # cut on magnitude (bandpass, min<mag<max)
         if (latest['magpsf'] < self.min_mag):
-            self.logger.debug("rejected: magpsf %.2f below threshod (%.2f)" %
+            self.logger.debug("rejected: magpsf %.2f < %.2f" %
                 (latest['magpsf'], self.min_mag))
             self.reason='low_mag'
             self.rejected_reason[latest['candid']] = self.reason
             return None
         
         if (latest['magpsf'] > self.max_mag):
-            self.logger.debug("rejected: magpsf %.2f above threshod (%.2f)" %
+            self.logger.debug("rejected: magpsf %.2f > %.2f" %
                 (latest['magpsf'], self.max_mag))
             self.reason='high_mag'
             self.rejected_reason[latest['candid']] = self.reason
@@ -182,14 +187,13 @@ class VeritasBlazarFilter(AbsAlertFilter):
         # check for positional coincidence with gamma-ray blazars
         for catq in self.db_queries:
             currentcat = self.db_queries[catq]
-            matchfound = currentcat.binaryserach(latest['ra'], latest['dec'], self.rs_arcsec)
+            rs_arcsec  = self.catalogs_arcsec[catq]
+            matchfound = currentcat.binaryserach(\
+                latest['ra'], latest['dec'], rs_arcsec)
             if matchfound:
                 return self.on_match_t2_units
             
-        self.logger.debug(
-            "rejected: not within %.2f arcsec from any source in the catalogs" % 
-            (self.rs_arcsec)
-        )
+        self.logger.debug("rejected: not in catalogs")
         
         self.reason='not_in_catalogs'
         self.rejected_reason[latest['candid']] = self.reason    
