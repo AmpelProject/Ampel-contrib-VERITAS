@@ -199,10 +199,9 @@ class T2BlazarProducts(AbsT2Unit):
                                 for (p1, p2) in zip(pairs[f1], pairs[f2])])
 
         # is it significantly bluer?
-        is_last = np.max(jds_val) == jds_val
         mean_color = np.mean(color_val[:-1])
-        last_color = color_val[is_last][0]
-        last_color_err = color_err[is_last][0]
+        last_color = color_val[-1]
+        last_color_err = color_err[-1]
 
         # return a dict with results
         colorresult['quantity'] = 'color'
@@ -252,10 +251,10 @@ class T2BlazarProducts(AbsT2Unit):
             if self.results[color]['poly_coef'] is None: continue
             if len(self.results[color]['poly_coef']) > 1:
                 max_score += 1.
-                if self.results[color]['poly_coef'][1] < 0:
+                if self.results[color]['poly_coef'][::-1][1] < 0:
                     excitement += 1
                     if len(self.results[color]['poly_coef']) > 2:
-                        if self.results[color]['poly_coef'][2] > 0:
+                        if self.results[color]['poly_coef'][::-1][2] > 0:
                             excitement -= 0.5
 
         # Check for changes in brightness in different filters.

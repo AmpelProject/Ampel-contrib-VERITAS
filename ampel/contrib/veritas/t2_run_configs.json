@@ -30,23 +30,60 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC"]
                 },
-                "3FHL":{
+                "4LAC":{
                     "use": "extcats",
                     "catq_kwargs": {
-                                    "ra_key": "RAJ2000",
-                                    "dec_key": "DEJ2000"
-                                },
+                      "ra_key": "RAJ2000",
+                      "dec_key": "DEJ2000",
+                    },
                     "rs_arcsec": 3,
-                    "keys_to_append": ["ASSOC"]
+                    "keys_to_append": [
+                      "ASSOC",
+                      "Redshift",
+                      "CLASS",
+                      "SED_class"
+                    ]
+                },
+                "4LAC_lowlat":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                      "ra_key": "RAJ2000",
+                      "dec_key": "DEJ2000",
+                    },
+                    "rs_arcsec": 3,
+                    "keys_to_append": [
+                      "ASSOC",
+                      "Redshift",
+                      "CLASS",
+                      "SED_class"
+                    ]
+                },
+                "3FHL": {
+                  "use": "extcats",
+                  "catq_kwargs": {
+                    "ra_key": "RAJ2000",
+                    "dec_key": "DEJ2000"
+                  },
+                  "rs_arcsec": 3,
+                  "keys_to_append": [
+                    "ASSOC",
+                    "Redshift",
+                    "CLASS"
+                  ]
                 },
                 "4FGL":{
                     "use": "extcats",
                     "catq_kwargs": {
-                                    "ra_key": "RAJ2000",
-                                    "dec_key": "DEJ2000"
-                                },
+                      "ra_key": "RAJ2000",
+                      "dec_key": "DEJ2000",
+                    },
                     "rs_arcsec": 3,
-                    "keys_to_append": ["ASSOC"]
+                    "keys_to_append": [
+                      "ASSOC",
+                      "Redshift",
+                      "CLASS",
+                      "SED_class"
+                    ]
                 },
                 "2WHSP":{
                     "use": "extcats",
