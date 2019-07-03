@@ -7,7 +7,9 @@
         "lastChange": "04.06.2019",
         "private": false,
         "parameters": {
-            "max_order": 2
+            "max_order": 2,
+            "calculate_color": True,
+            "bblocks_p0": 0.05
         }
     },
     "CATALOGMATCH_vheblazars": {
