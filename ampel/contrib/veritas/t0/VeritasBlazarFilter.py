@@ -33,22 +33,20 @@ class VeritasBlazarFilter(AbsAlertFilter):
         """
         Necessary class to validate the configuration
         """
-        MIN_NDET        : int   = 3    # number of previous detections
-        MIN_RB          : float = 0.60 # real bogus score
-        MIN_MAG         : float = 13.0 # brightness threshold [mag]
-        MAX_MAG         : float = 18.5 # brightness threshold [mag]
-        SCORR           : float = 25.0 # peak pixel signal-to-noise ratio
-        SSNRMS          : float = 25.0 # S/stddev(S) where S=conv(D,PSF)
-        SHARPNESS       : float = -1   # star-like ~ 0, CRs < 0, extended > 0
-        DIST_PSNR1      : float = 0.3  # distance to closest src of PS1 catalog.
-        SGS_SCORE1      : float = 0.5  # how likely it is that src to be a star.
+        MIN_NDET        : int   = 2       # number of previous detections
+        MIN_RB          : float = 0.40    # real bogus score
+        MIN_MAG         : float = 12.0    # brightness threshold [mag]
+        MAX_MAG         : float = 19.5    # brightness threshold [mag]
+        SCORR           : float = 4.0     # peak pixel signal-to-noise ratio
+        SSNRMS          : float = 4.0     # S/stddev(S) where S=conv(D,PSF)
+        MIN_SHARPNESS   : float = -1000   # star-like ~ 0, CRs < 0, extended > 0
+        MAX_SHARPNESS   : float = 1000    # star-like ~ 0, CRs < 0, extended > 0
+        DIST_PSNR1      : float = 0.3     # distance to closest src of PS1 catalog.
+        SGS_SCORE1      : float = 0.5     # how likely it is that src to be a star.
         CATALOGS_ARCSEC : dict  = {
             "GammaCAT": 20,
             "3FHL": 10,
             "4FGL": 10,
-            "2WHSP": 3,
-            "RomaBZCAT": 3,
-            "XRaySelBLL": 3
         }
 
     def __init__(self, on_match_t2_units, base_config=None, run_config=None, logger=None):
@@ -76,7 +74,8 @@ class VeritasBlazarFilter(AbsAlertFilter):
         self.max_mag                           = rc_dict['MAX_MAG']
         self.scorr                             = rc_dict['SCORR']
         self.ssnrms                            = rc_dict['SSNRMS'] 
-        self.max_sharpness                     = rc_dict['SHARPNESS']
+        self.min_sharpness                     = rc_dict['MIN_SHARPNESS']
+        self.max_sharpness                     = rc_dict['MAX_SHARPNESS']
         self.max_distpsnr1                     = rc_dict['DIST_PSNR1']
         self.max_sgscore1                      = rc_dict['SGS_SCORE1']
         self.catalogs_arcsec                   = rc_dict['CATALOGS_ARCSEC']
@@ -152,8 +151,7 @@ class VeritasBlazarFilter(AbsAlertFilter):
             self.reason='low_mag'
             self.rejected_reason[latest['candid']] = self.reason
             return None
-        
-        if (latest['magpsf'] > self.max_mag):
+        elif (latest['magpsf'] > self.max_mag):
             self.logger.debug("rejected: magpsf %.2f > %.2f" %
                 (latest['magpsf'], self.max_mag))
             self.reason='high_mag'
@@ -162,9 +160,14 @@ class VeritasBlazarFilter(AbsAlertFilter):
         
         # check sharpness (to remove cosmic rays, negative values)
         # http://stsdas.stsci.edu/cgi-bin/gethelp.cgi?peak
-        if (latest['sharpnr']) < self.max_sharpness:
+        if (latest['sharpnr']) < self.min_sharpness:
             # likely a cosmic ray
             self.reason='cosmic_ray_sharpness'
+            self.rejected_reason[latest['candid']] = self.reason
+            return None
+        elif (latest['sharpnr']) > self.max_sharpness:
+            # likely an extended source
+            self.reason='extended_src_sharpness'
             self.rejected_reason[latest['candid']] = self.reason
             return None
             

@@ -11,24 +11,28 @@
 			"t0Filter" : {
 				"unitId" : "VeritasBlazarFilter",
 				"runConfig": {
-					"MIN_NDET": 0,
-					"MIN_RB": 0.3,
-					"RS_ARCSEC": 1800,
-					"MIN_MAG": 10,
-					"MAX_MAG": 18.5,
-					"SCORR": 0,
-					"SSNRMS": 0,
-					"SHARPNESS": -1,
-					"DIST_PSNR1": 0.3,
-					"SGS_SCORE1": 0.5,
-					"CATALOGS ": "GammaCAT, 3FHL",
+					"MIN_NDET": 2,
+					"MIN_RB": 0.5,
+					"MIN_MAG": 12,
+					"MAX_MAG": 19.5,
+					"SCORR": 4,
+					"SSNRMS": 4,
+					"MIN_SHARPNESS": -1,
+					"MAX_SHARPNESS": 0.25,
+					"DIST_PSNR1": 1,
+					"SGS_SCORE1": 0.9,
 					"CATALOGS_ARCSEC" : {
 						"GammaCAT": 20,
+						"4LAC": 10,
+						"4LAC_lowlat": 10,
 						"3FHL": 10,
 						"4FGL": 10,
 						"2WHSP": 3,
 						"RomaBZCAT": 3,
-						"XRaySelBLL": 3
+						"XRaySelBLL": 3,
+						"TGeVCAT": 3,
+						"Plotkin10": 3,
+						"BeppoSAXblazars": 3
 					}
 				}
 			},
