@@ -8,7 +8,7 @@
         "private": false,
         "parameters": {
             "max_order": 2,
-            "calculate_color": True,
+            "calculate_color": true,
             "bblocks_p0": 0.05
         }
     },
@@ -27,18 +27,18 @@
                                     "ra_key": "RAJ2000",
                                     "dec_key": "DEJ2000"
                                 },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 20,
                     "keys_to_append": ["ASSOC"]
                 },
                 "4LAC":{
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
-                      "dec_key": "DEJ2000",
+                      "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 10,
                     "keys_to_append": [
-                      "ASSOC",
+                      "ASSOC1",
                       "Redshift",
                       "CLASS",
                       "SED_class"
@@ -48,11 +48,11 @@
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
-                      "dec_key": "DEJ2000",
+                      "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 10,
                     "keys_to_append": [
-                      "ASSOC",
+                      "ASSOC1",
                       "Redshift",
                       "CLASS",
                       "SED_class"
@@ -64,7 +64,7 @@
                     "ra_key": "RAJ2000",
                     "dec_key": "DEJ2000"
                   },
-                  "rs_arcsec": 3,
+                  "rs_arcsec": 10,
                   "keys_to_append": [
                     "ASSOC",
                     "Redshift",
@@ -75,14 +75,12 @@
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
-                      "dec_key": "DEJ2000",
+                      "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 10,
                     "keys_to_append": [
-                      "ASSOC",
-                      "Redshift",
-                      "CLASS",
-                      "SED_class"
+                      "ASSOC1",
+                      "CLASS"
                     ]
                 },
                 "2WHSP":{

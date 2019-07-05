@@ -11,10 +11,9 @@ import logging
 from pymongo import MongoClient
 from astropy.coordinates import SkyCoord
 from astropy.table import Table
-from urllib.parse import urlparse
 
 from ampel.base.abstract.AbsT2Unit import AbsT2Unit
-from ampel.core.flags.T2RunStates import T2RunStates
+#from ampel.core.flags.T2RunStates import T2RunStates
 from ampel.contrib.hu.utils import info_as_debug
 
 from extcats import CatalogQuery
@@ -31,7 +30,7 @@ class T2CatalogMatch(AbsT2Unit):
 	version = 0.1
 	resources = ('extcats.reader', 'catsHTM.default')
 
-	def __init__(self, logger, base_config):
+	def __init__(self, logger=None, base_config=None):
 		"""
 		"""
 		
@@ -42,8 +41,12 @@ class T2CatalogMatch(AbsT2Unit):
 		self.catq_objects = {}
 		
 		# initialize the catsHTM paths and the extcats query client.
-		self.catshtm_client 			= catshtm_server.get_client(base_config['catsHTM.default'])
-		self.catq_client 		     	= MongoClient(base_config['extcats.reader'])
+		if 'catsHTM.default' in self.base_config:
+			self.catshtm_client 			= catshtm_server.get_client(self.base_config['catsHTM.default'])
+		if 'extcats.reader' not in self.base_config:
+			self.catq_client = MongoClient()
+		else:
+			self.catq_client 		     	= MongoClient(self.base_config['extcats.reader'])
 		self.catq_kwargs_global 		= {
 										'logger': info_as_debug(self.logger),
 										'dbclient': self.catq_client,
@@ -71,7 +74,7 @@ class T2CatalogMatch(AbsT2Unit):
 		"""
 		
 		# check if the catalog exist as an extcats database
-		if not catalog in self.catq_client.database_names():
+		if not catalog in self.catq_client.list_database_names():
 			raise ValueError("cannot find %s among installed extcats catalogs"%(catalog))
 		
 		# check if you have already init this peculiar query
@@ -198,7 +201,8 @@ class T2CatalogMatch(AbsT2Unit):
 		try:
 			transient_ra, transient_dec = light_curve.get_pos(**lc_get_pos_kwargs)
 		except IndexError:
-			return T2RunStates.MISSING_INFO
+			raise NotImplemented
+			#return T2RunStates.MISSING_INFO # TODO change me back !
 		self.logger.debug("Transient position (ra, dec): %.4f, %.4f deg"%(transient_ra, transient_dec))
 		
 		# initialize the catalog quer(ies). Use instance variable to aviod duplicates
@@ -222,7 +226,6 @@ class T2CatalogMatch(AbsT2Unit):
 				# get the catalog query object and do the query
 				catq = self.init_extcats_query(catalog, catq_kwargs=cat_opts.get('catq_kwargs'))
 				src, dist = catq.findclosest(transient_ra, transient_dec, cat_opts['rs_arcsec'])
-				
 			elif use == 'catsHTM':
 				
 				# catshtm needs coordinates in radians
@@ -242,7 +245,7 @@ class T2CatalogMatch(AbsT2Unit):
 						ra_key, dec_key = 'ra', 'dec'
 					else:
 						ra_key, dec_key = catq_kwargs.get('ra_key', 'ra'), catq_kwargs.get('dec_key', 'dec')
-					
+
 					# get the closest source and its distance (catsHTM stuff is in radians)
 					srcs_tab[ra_key]  = degrees(srcs_tab[ra_key])
 					srcs_tab[dec_key] = degrees(srcs_tab[dec_key])

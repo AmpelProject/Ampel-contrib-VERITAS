@@ -1,4 +1,5 @@
 from ampel.base.abstract.AbsT2Unit import AbsT2Unit
+import astropy.stats as astats
 import logging
 import numpy as np
 import itertools
@@ -38,7 +39,7 @@ class T2BlazarProducts(AbsT2Unit):
         self.available_colors = []
         self.results = dict()
 
-    def classify_in_filters(self):
+    def classify_in_filters(self,light_curve):
         '''
         Classify the photometric points in filter groups.
         :param light_curve:  object containing the photometry points
@@ -133,7 +134,7 @@ class T2BlazarProducts(AbsT2Unit):
         last_mag = photresult['mag_val'][-1]
         last_mag_err = photresult['mag_err'][-1]
         # is_brighter  = last_mag+last_mag_err<mean_mag-mean_mag_err
-        is_brighter = last_mag + last_mag_err < mean_mag
+        is_brighter = int(last_mag + last_mag_err < mean_mag)
         photresult['is_brighter'] = is_brighter
         # Fit the trend by a polynomium of degree 2,3 or 4
         # print('........ polyfit')
@@ -145,7 +146,12 @@ class T2BlazarProducts(AbsT2Unit):
             x=photresult['jds_val'],
             y=photresult['mag_val'],
             yerr=photresult['mag_err'])
-        # append everything
+
+        # Convert everything back to lists to allow serialization
+        for item in photresult:
+            if type(photresult[item]) == np.ndarray:
+                photresult[item] = photresult[item].tolist()
+
         self.results[photresult['label']] = photresult
         if photresult['label'] not in self.available_photom:
             self.available_photom.append(photresult['label'])
@@ -222,8 +228,13 @@ class T2BlazarProducts(AbsT2Unit):
             y=colorresult['color_val'],
             yerr=colorresult['color_err'])
 
+        # Convert everything back to lists to allow serialization
+        for item in colorresult:
+            if type(colorresult[item]) == np.ndarray:
+                colorresult[item] = colorresult[item].tolist()
+
         # check the color
-        colorresult['is_bluer'] = last_color + last_color_err < mean_color
+        colorresult['is_bluer'] = int(last_color + last_color_err < mean_color)
         self.results[colorresult['label']] = colorresult
         if colorresult['label'] not in self.available_colors:
             self.available_colors.append(colorresult['label'])
@@ -246,7 +257,7 @@ class T2BlazarProducts(AbsT2Unit):
         # - TODO: additional test with the bayesian blocks??
         for color in self.available_colors:
             max_score += 1.
-            if self.results[color]['is_bluer'] is True:
+            if self.results[color]['is_bluer'] is 1:
                 excitement += 1
             if self.results[color]['poly_coef'] is None: continue
             if len(self.results[color]['poly_coef']) > 1:
@@ -265,7 +276,7 @@ class T2BlazarProducts(AbsT2Unit):
         # - TODO: additional test with the bayesian blocks??
         for band in self.available_photom:
             max_score += 1.
-            if self.results[band]['is_brighter'] is True:
+            if self.results[band]['is_brighter'] is 1:
                 excitement += 1
             if self.results[band]['poly_coef'] is None: continue
             if len(self.results[band]['poly_coef']) > 1:
@@ -311,7 +322,7 @@ class T2BlazarProducts(AbsT2Unit):
         self.run_config = run_config if run_config is not None else self.base_config
         self.min_jd = np.min(light_curve.get_values('jd'))
         self.max_jd = np.max(light_curve.get_values('jd'))
-        self.classify_in_filters()
+        self.classify_in_filters(light_curve)
 
         for color in self.available_bands:
             photresult = self.photometry_estimation(color)
