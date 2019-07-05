@@ -65,36 +65,6 @@ class HackDict(dict):
     def dict(self):
         return(self.item)
 
-def make_diagnostic_plots(list_of_alerts,output_file=None):
-    import numpy as np
-    import matplotlib as mpl
-    mpl.rcParams['figure.dpi'] = 120
-    mpl.rcParams['savefig.dpi'] = 120
-    import matplotlib.pyplot as plt
-
-    variables = ["magpsf", "sharpnr", "ndethist",
-                 "distpsnr1", "scorr", "sgscore1",
-                 "rb", "ssnrms"]
-
-    fig = plt.figure()
-    for k in range(len(variables)):
-        ax = fig.add_subplot(3, 3, k + 1)
-        values = [alert.get_values(variables[k])[0] for alert in list_of_alerts]
-
-        lims = max(min(values), np.percentile(values, 1) * 0.5), \
-               min(max(values), np.percentile(values, 80) * 2)
-        ax.set_xlim(lims)
-        ax.hist(values, bins=(np.linspace(lims[0], lims[-1], 50)))
-        # ax.set_ylabel("Frequency")
-        ax.set_xlabel(variables[k])
-    plt.tight_layout()
-    if output_file is not None:
-        plt.savefig(output_file)
-    else:
-        plt.show()
-    return(fig)
-
-
 class TestT0(unittest.TestCase):
     def test_accepted(self):
         logging.info("Testing a sample of good alerts (should be accepted):")
