@@ -88,7 +88,7 @@ class VeritasBlazarFilter(AbsAlertFilter):
         #    # loop over databases
         #    if catq in ['admin','local','config']: continue
         
-        for catq in self.catalogs:
+        for catq in self.catalogs_arcsec:
             if catq not in catq_client.list_database_names():
                 self.logger.error("Catalog {0} not in the Mongo DB".format(catq))
 
