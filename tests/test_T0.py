@@ -15,6 +15,7 @@ basedir=os.path.dirname(os.path.realpath(__file__)).replace("tests","")
 alertfilepath="{0}/tests/ztf_public_20190624".format(basedir)
 mongodbpath = "/tmp/mongodb"
 
+
 def run_mongo_if_needed():
     import subprocess
     import time
@@ -40,7 +41,7 @@ def run_mongo_if_needed():
         time.sleep(1)
         print("Running fresh mongod")
         os.makedirs("/tmp/mongotest",exist_ok=True)
-        command = "mongod --quiet --fork --dbpath /tmp/mongotest --logpath /tmp/mongo.log"
+        command = "mongod --quiet --fork --dbpath /tmp/mongotest --logpath /dev/null"
         command_list = command.split()
         p = subprocess.Popen(command_list)
         p.wait()
@@ -65,6 +66,23 @@ class HackDict(dict):
     def dict(self):
         return(self.item)
 
+
+run_mongo_if_needed()
+
+with open('{0}/ampel/contrib/veritas/channels.json'.format(basedir), 'r') as infile:
+	data = json.load(infile)
+	run_config = HackDict(data[0]['sources']['t0Filter']['runConfig'])
+
+base_config = {
+	'extcats.reader': None
+}
+
+my_filter = VeritasBlazarFilter( \
+	on_match_t2_units=['T2BlazarProducts'],
+	run_config=run_config,
+	base_config=base_config)
+
+
 class TestT0(unittest.TestCase):
     def test_accepted(self):
         logging.info("Testing a sample of good alerts (should be accepted):")
@@ -84,19 +102,4 @@ class TestT0(unittest.TestCase):
         self.assertEqual(100. * len(accepted) / n_processed, 0)
 
 if __name__ == '__main__':
-
-    run_mongo_if_needed()
-    with open('{0}/ampel/contrib/veritas/channels.json'.format(basedir), 'r') as infile:
-        data = json.load(infile)
-        run_config = HackDict(data[0]['sources']['t0Filter']['runConfig'])
-
-    base_config = {
-        'extcats.reader': None
-    }
-
-    my_filter = VeritasBlazarFilter( \
-        on_match_t2_units=['T2BlazarProducts'],
-        run_config=run_config,
-        base_config=base_config)
-
     unittest.main()
