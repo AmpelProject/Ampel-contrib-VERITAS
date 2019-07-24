@@ -1,31 +1,39 @@
 {
-  "SlackSummaryPublisher_Lensing": {
-    "mycols": [
-      "ztf_name",
-      "ra",
-      "dec",
-      "magpsf",
-      "sgscore1",
-      "rb",
-      "most_recent_detection",
-      "first_detection",
-      "n_detections",
-      "distnr",
-      "distpsnr1",
-      "isdiffpos",
-      "_id"
-    ],
-    "channel(s)": [
-      "OKC_LENSED",
-      "TRANSIENTS_IN_ELLIPTICAL"
-    ],
-    "excitement_levels": {
-      "Low": 50,
-      "Mid": 200,
-      "High": 400
+    "job": "WebViews",
+    "schedule": "every().day.at('15:00')",
+    "desycloud.default": "https://desycloud.desy.de/remote.php/webdav/",
+    "transients": {
+        "select": {
+            "modified": {
+                "after": {
+                    "use": "$timeDelta",
+                    "arguments": {"days": -1}
+                }
+            },
+            "channels": {"anyOf": [
+                "VERITAS_BLAZARS"
+                ]
+            },
+            "withFlags": "INST_ZTF",
+            "withoutFlags": "HAS_ERROR"
+        },
+        "state": "$latest",
+        "content": {
+            "docs": ["TRANSIENT", "COMPOUND", "T2RECORD", "PHOTOPOINT", "UPPERLIMIT"]
+        },
+        "chunk": 200
     },
-    "Slack_token": "xoxb-106494213175-397912266598-TOE3sSy3KuyDr6bPIuyO730L",
-    "Slack_channel": "#ztf_lensing",
-    "full_photometry": true
-  }
+    "tasks": [
+        {
+            "task": "WebViews",
+            "unitId": "TransientWebPublisher",
+            "transients": {
+                "select": {
+                    "channels": {
+                        "anyOf": ["$forEach"]
+                    }
+                }
+            }
+        }
+    ]
 }

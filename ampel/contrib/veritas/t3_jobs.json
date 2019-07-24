@@ -1,33 +1,39 @@
 {
-    "jobs": "SlackSummaryPublisher",
-	"schedule": "every().hour",
-	"transients": {
-		"select": {
-			"scienceRecords": {
-				"unitId": "T2CatalogMatch",
-				"runConfig": "general",
-				"match": {
-					
-    "mycols": [
-      "ztf_name",
-      "ra",
-      "dec",
-      "magpsf",
-      "sgscore1",
-      "rb",
-      "most_recent_detection",
-      "first_detection",
-      "n_detections",
-      "distnr",
-      "distpsnr1",
-      "isdiffpos",
-      "_id"
-    ],
-    "channel(s)": [
-      "VERITAS_BLAZARS"
-    ],
-    "Slack_token": "xoxp-430378314450-643299264339-643305800547-31a08f0128fae774808b4b8f23ac9c34",
-    "Slack_channel": "#ztf_alerts",
-    "full_photometry": true
-  }
+    "job": "WebViews",
+    "schedule": "every().day.at('15:00')",
+    "desycloud.default": "https://desycloud.desy.de/remote.php/webdav/",
+    "transients": {
+        "select": {
+            "modified": {
+                "after": {
+                    "use": "$timeDelta",
+                    "arguments": {"days": -1}
+                }
+            },
+            "channels": {"anyOf": [
+                "VERITAS_BLAZARS"
+                ]
+            },
+            "withFlags": "INST_ZTF",
+            "withoutFlags": "HAS_ERROR"
+        },
+        "state": "$latest",
+        "content": {
+            "docs": ["TRANSIENT", "COMPOUND", "T2RECORD", "PHOTOPOINT", "UPPERLIMIT"]
+        },
+        "chunk": 200
+    },
+    "tasks": [
+        {
+            "task": "WebViews",
+            "unitId": "TransientWebPublisher",
+            "transients": {
+                "select": {
+                    "channels": {
+                        "anyOf": ["$forEach"]
+                    }
+                }
+            }
+        }
+    ]
 }
