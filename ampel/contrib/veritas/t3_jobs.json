@@ -1,39 +1,40 @@
-{
-    "job": "WebViews",
-    "schedule": "every().day.at('15:00')",
-    "desycloud.default": "https://desycloud.desy.de/remote.php/webdav/",
-    "transients": {
-        "select": {
-            "modified": {
-                "after": {
-                    "use": "$timeDelta",
-                    "arguments": {"days": -1}
-                }
-            },
-            "channels": {"anyOf": [
-                "VERITAS_BLAZARS"
-                ]
-            },
-            "withFlags": "INST_ZTF",
-            "withoutFlags": "HAS_ERROR"
-        },
-        "state": "$latest",
-        "content": {
-            "docs": ["TRANSIENT", "COMPOUND", "T2RECORD", "PHOTOPOINT", "UPPERLIMIT"]
-        },
-        "chunk": 200
-    },
-    "tasks": [
-        {
-            "task": "WebViews",
-            "unitId": "TransientWebPublisher",
-            "transients": {
-                "select": {
-                    "channels": {
-                        "anyOf": ["$forEach"]
-                    }
-                }
-            }
-        }
-    ]
-}
+[
+	{
+		"job": "VeritasBlazarSummary",
+		"schedule": "every().day.at('15:00')",
+		"transients": {
+			"select": {
+				"channels": "VERITAS_BLAZARS",
+				"modified": {
+					"after": {
+						"use": "$timeLastRun",
+						"event": "VeritasBlazarWebViews"
+					}
+				},
+				"scienceRecords": [
+					{
+						"unitId": "T2BLAZARPRODUTCS",
+						"runConfig": "dynamic",
+						"match": {
+							"excitement": {"$gt": 0.5}
+						}
+					}
+				]
+			},
+			"state": "$latest",
+			"content": {
+				"docs": ["TRANSIENT", "COMPOUND", "T2RECORD", "PHOTOPOINT", "UPPERLIMIT"]
+			}
+		},
+		"tasks": [
+			{
+				"task": "VeritasBlazarChannelSummary",
+				"unitId": "ChannelSummaryPublisher"
+			},
+			{
+				"task": "VeritasBlazarWebViews",
+				"unitId": "TransientWebPublisher"
+			}
+		]
+	}
+]
