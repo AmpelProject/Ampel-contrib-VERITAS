@@ -22,9 +22,9 @@ setup(name='ampel-contrib-veritas',
               #'CATALOGMATCH = ampel.contrib.veritas.t2.T2CatalogMatch:T2CatalogMatch'
               'T2BLAZARPRODUTCS = ampel.contrib.veritas.t2.T2BlazarProducts:T2BlazarProducts'
           ],
-          #'ampel.pipeline.t3.jobs' : [
-          #    'veritas = ampel.contrib.veritas.channels:load_t3_jobs',
-          #],
+          'ampel.pipeline.t3.jobs' : [
+             'veritas = ampel.contrib.veritas.channels:load_t3_jobs',
+          ],
           #'ampel.pipeline.resources' : [
           #    'extcats = ampel.contrib.veritas.resources:extcatsURI',
           #]
