@@ -39,6 +39,18 @@ class T2BlazarProducts(AbsT2Unit):
         self.available_colors = []
         self.results = dict()
 
+    @staticmethod
+    def get_unique_photopoints(light_curve, keys=['jd', 'fid'], score='rb'):
+        """
+        Return items uniquely identified by `keys`, resolving ties with `score`
+        """
+        ppo = {}
+        for item in light_curve.ppo_list:
+            key = tuple(item.get_value(k) for k in keys)
+            if (key not in ppo) or (not ppo[key].get_value(score) > item.get_value(score)):
+                ppo[key] = item
+        return ppo.values()
+
     def classify_in_filters(self,light_curve):
         '''
         Classify the photometric points in filter groups.
@@ -48,7 +60,7 @@ class T2BlazarProducts(AbsT2Unit):
         '''
         self.colordict = {1: 'g', 2: 'r', 3: 'i'}  # i is not really used
         self.data_filter = {}
-        for item in light_curve.ppo_list:
+        for item in self.get_unique_photopoints(light_curve):
             # item['mjd'] = item['jd']-2400000.5
             if item.get_value('fid') not in self.data_filter:
                 self.data_filter[item.get_value('fid')] = []

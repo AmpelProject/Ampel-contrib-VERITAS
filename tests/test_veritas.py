@@ -8,6 +8,8 @@ from ampel.contrib.veritas.t0.VeritasBlazarFilter import VeritasBlazarFilter
 from ampel.contrib.veritas.t2.T2BlazarProducts import T2BlazarProducts
 from ampel.contrib.veritas.t2.T2CatalogMatch import T2CatalogMatch
 
+import pytest
+
 import unittest
 import os
 import json
@@ -106,7 +108,8 @@ class TestT0(unittest.TestCase):
         self.assertEqual(100. * len(accepted) / n_processed, 0)
 '''
 
-
+# skip this in automated testing, as it does not assert anything
+@pytest.mark.skip
 class TestT2(unittest.TestCase):
     def test_T2(self):
         logging.info("Testing a sample of good alerts (T0+T2-photometry)")
@@ -141,6 +144,42 @@ class TestT2(unittest.TestCase):
 
             with open("output_T2catalogmatch.json", "r", newline='\n') as json_file:
                 print(json.load(json_file))
+
+@pytest.fixture
+def t2_run_config():
+    with open('{0}/ampel/contrib/veritas/t2_run_configs.json'.format(basedir), 'r') as infile:
+        data = json.load(infile)
+        return data['T2BLAZARPRODUTCS_dynamic']['parameters']
+
+@pytest.mark.remote_data
+@pytest.fixture
+def multiple_photopoint_lightcurve():
+    from urllib.request import urlopen
+    import gzip
+    from ampel.utils import json_serialization
+    with gzip.open(urlopen("https://github.com/mireianievas/Ampel-contrib-VERITAS/files/3467897/5d4578ae74dd99059e8c24f7.json.gz")) as f:
+        return next(json_serialization.load(f))
+
+def test_bayesian_blocks_with_multi_photopoints(multiple_photopoint_lightcurve, t2_run_config):
+    """
+    Test robustness against multiple photopoints from the same exposure
+    
+    See: https://github.com/mireianievas/Ampel-contrib-VERITAS/issues/2
+    """
+    from collections import defaultdict
+    unit = T2BlazarProducts()
+    # build a list of (possibly duplicated) photopoints
+    ppo = defaultdict(list)
+    for item in multiple_photopoint_lightcurve.ppo_list:
+        ppo[tuple(item.get_value(k) for k in ('jd','fid'))].append(item)
+    assert any(len(items)>1 for items in ppo), "light curve contains duplicated photopoints"
+    keys = set()
+    for item in unit.get_unique_photopoints(multiple_photopoint_lightcurve):
+        key = tuple(item.get_value(k) for k in ('jd','fid'))
+        assert key not in keys, "photopoints are unique"
+        keys.add(key)
+        assert all(dup.get_value('rb') <= item.get_value('rb') for dup in ppo[key]), "selected photopoint has highest score"
+    T2BlazarProducts().run(multiple_photopoint_lightcurve, t2_run_config)
 
 if __name__ == '__main__':
     unittest.main()
