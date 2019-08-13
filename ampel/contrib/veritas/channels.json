@@ -35,7 +35,7 @@
 			},
 			"t2Compute" : [
 					{
-						"unitId" : "T2BLAZARPRODUTCS",
+						"unitId" : "T2BLAZARPRODUCTS",
 						"runConfig": "dynamic"
 					},
 					{

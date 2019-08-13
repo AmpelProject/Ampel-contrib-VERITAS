@@ -119,7 +119,7 @@ class TestT2(unittest.TestCase):
 
         with open('{0}/ampel/contrib/veritas/t2_run_configs.json'.format(basedir), 'r') as infile:
             data = json.load(infile)
-            run_config_phot = data['T2BLAZARPRODUTCS_dynamic']['parameters']
+            run_config_phot = data['T2BLAZARPRODUCTS_dynamic']['parameters']
             run_config_cat  = data['CATALOGMATCH_vheblazars']['parameters']
 
         for alert in accepted:
@@ -149,7 +149,7 @@ class TestT2(unittest.TestCase):
 def t2_run_config():
     with open('{0}/ampel/contrib/veritas/t2_run_configs.json'.format(basedir), 'r') as infile:
         data = json.load(infile)
-        return data['T2BLAZARPRODUTCS_dynamic']['parameters']
+        return data['T2BLAZARPRODUCTS_dynamic']['parameters']
 
 @pytest.mark.remote_data
 @pytest.fixture
