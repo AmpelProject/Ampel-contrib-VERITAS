@@ -10,16 +10,7 @@
 						"use": "$timeLastRun",
 						"event": "VeritasBlazarWebViews"
 					}
-				},
-				"scienceRecords": [
-					{
-						"unitId": "T2BLAZARPRODUTCS",
-						"runConfig": "dynamic",
-						"match": {
-							"excitement": {"$gt": 0.5}
-						}
-					}
-				]
+				}
 			},
 			"state": "$latest",
 			"content": {
