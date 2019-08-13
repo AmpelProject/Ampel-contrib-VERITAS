@@ -1,7 +1,7 @@
 #!/bin/env python
 
 
-from ampel.ztf.pipeline.t0.DevAlertProcessor import DevAlertProcessor
+from ampel.ztf.t0.DevAlertProcessor import DevAlertProcessor
 from ampel.ztf.utils.ZIAlertUtils import ZIAlertUtils
 import ampel.contrib.veritas.t0.VeritasBlazarFilter as VeritasModule
 from ampel.contrib.veritas.t0.VeritasBlazarFilter import VeritasBlazarFilter
