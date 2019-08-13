@@ -19,7 +19,7 @@ from aiohttp.helpers import strip_auth_from_url, URL
 
 from ampel.base.TransientView import TransientView
 from ampel.base.abstract.AbsT3Unit import AbsT3Unit
-from ampel.pipeline.common.ZTFUtils import ZTFUtils
+from ampel.ztf.common.ZTFUtils import ZTFUtils
 from ampel.archive import ArchiveDB
 from ampel.utils.json import AmpelEncoder, object_hook
 
