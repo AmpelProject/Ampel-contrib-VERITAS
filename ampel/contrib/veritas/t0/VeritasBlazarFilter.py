@@ -33,20 +33,35 @@ class VeritasBlazarFilter(AbsAlertFilter):
         """
         Necessary class to validate the configuration
         """
+        RECOMMENDED_CUTS: int   = 0       # recommended cuts for a clean sample (should not be needed)
         MIN_NDET        : int   = 2       # number of previous detections
-        MIN_RB          : float = 0.40    # real bogus score
-        MIN_MAG         : float = 12.0    # brightness threshold [mag]
-        MAX_MAG         : float = 19.5    # brightness threshold [mag]
-        SCORR           : float = 4.0     # peak pixel signal-to-noise ratio
-        SSNRMS          : float = 4.0     # S/stddev(S) where S=conv(D,PSF)
-        MIN_SHARPNESS   : float = -1000   # star-like ~ 0, CRs < 0, extended > 0
-        MAX_SHARPNESS   : float = 1000    # star-like ~ 0, CRs < 0, extended > 0
-        DIST_PSNR1      : float = 0.3     # distance to closest src of PS1 catalog.
-        SGS_SCORE1      : float = 0.5     # how likely it is that src to be a star.
+        MIN_RB          : float = 0.50    # real bogus score
+        MIN_MAG         : float = 9.0     # brightness threshold [mag]
+        MAX_MAG         : float = 20.0    # brightness threshold [mag]
+        MAX_BAD         : int   = 0       # Maximum number of bad pixels in a 5x5 stamp.
+        MAX_ELONG       : float = 1.3     # aimage/bimage (major/minor axes)
+        MAX_FWHM        : float = 5.0     # maximum FWHM
+        MAX_MAGDIFF     : float = 1.3     # diff ap - psf phot
+        SCORR           : float = 0.0     # peak pixel signal-to-noise ratio
+        SSNRMS          : float = 0.0     # S/stddev(S) where S=conv(D,PSF)
+        MIN_SHARPNESS   : float = -2      # star-like ~ 0, CRs < 0, extended > 0
+        MAX_SHARPNESS   : float = +2      # star-like ~ 0, CRs < 0, extended > 0
+        DIST_PSNR1      : float = 0.5     # distance to closest src of PS1 catalog.
+        SGS_SCORE1      : float = 0.9     # how likely it is that src to be a star.
         CATALOGS_ARCSEC : dict  = {
-            "GammaCAT": 20,
-            "3FHL": 10,
-            "4FGL": 10,
+            "GammaCAT": 40,
+            "4LAC": 20,
+            "4LAC_lowlat": 20,
+            "3FHL": 20,
+            "4FGL": 20,
+            "2WHSP": 2,
+            "RomaBZCAT": 2,
+            "XRaySelBLL": 2,
+            "Plotkin10": 2,
+            "BeppoSAXblazars": 5,
+            "FRICAT": 10,
+            "FRIICAT": 10,
+            "MILLIQUAS": 1
         }
 
     def __init__(self, on_match_t2_units, base_config=None, run_config=None, logger=None):
@@ -68,10 +83,15 @@ class VeritasBlazarFilter(AbsAlertFilter):
             self.logger.info("Using %s=%s" % (k, val))
         
         # ----- set filter properties ----- #
+        self.recommended_cuts                  = rc_dict['RECOMMENDED_CUTS']
         self.min_ndet                          = rc_dict['MIN_NDET']
         self.rb_th                             = rc_dict['MIN_RB']
         self.min_mag                           = rc_dict['MIN_MAG']
         self.max_mag                           = rc_dict['MAX_MAG']
+        self.max_bad                           = rc_dict['MAX_BAD']
+        self.max_elong                         = rc_dict['MAX_ELONG']
+        self.max_fwhm                          = rc_dict['MAX_FWHM']
+        self.max_magdiff                       = rc_dict['MAX_MAGDIFF']
         self.scorr                             = rc_dict['SCORR']
         self.ssnrms                            = rc_dict['SSNRMS'] 
         self.min_sharpness                     = rc_dict['MIN_SHARPNESS']
@@ -123,10 +143,47 @@ class VeritasBlazarFilter(AbsAlertFilter):
         # cut on RB (1 is real, 0 is bogus)
         latest = alert.pps[0]
         
+        if self.recommended_cuts == 1:
+            # Apart from the specified cuts we can do the recommended cuts from tests done at IPAC
+            # From https://github.com/ZwickyTransientFacility/ztf-avro-alert/blob/master/docs/filtering.md
+            if (latest['rb']    < 0.65):  return None
+            if (latest['nbad']  > 0):     return None
+            if (latest['fwhm']  > 5):     return None
+            if (latest['elong'] > 1.2):   return None
+            if np.abs(latest['magdiff'] > 0.1): return None
+        
+        if latest['nbad'] > self.max_bad:
+            self.logger.debug("rejected: NBAD %d above threshold (%d)" %
+                (latest['nbad'], self.max_bad))
+            self.reason='high_nbad'
+            self.rejected_reason[latest['candid']] = self.reason
+            return None
+        
         if latest['rb'] < self.rb_th:
             self.logger.debug("rejected: RB score %.2f below threshold (%.2f)" %
                 (latest['rb'], self.rb_th))
             self.reason='low_rb'
+            self.rejected_reason[latest['candid']] = self.reason
+            return None
+        
+        if latest['elong'] > self.max_elong:
+            self.logger.debug("rejected: ELONG score %.2f above threshold (%.2f)" %
+                (latest['elong'], self.max_elong))
+            self.reason='high_elong'
+            self.rejected_reason[latest['candid']] = self.reason
+            return None
+        
+        if latest['fwhm'] > self.max_fwhm:
+            self.logger.debug("rejected: FWHM score %.2f above threshold (%.2f)" %
+                (latest['fwhm'], self.max_fwhm))
+            self.reason='high_fwhm'
+            self.rejected_reason[latest['candid']] = self.reason
+            return None
+        
+        if np.abs(latest['magdiff']) > self.max_magdiff:
+            self.logger.debug("rejected: MAGDIFF %.2f above threshold (%.2f)" %
+                (latest['magdiff'], self.max_magdiff))
+            self.reason='high_magdiff'
             self.rejected_reason[latest['candid']] = self.reason
             return None
         
@@ -181,10 +238,25 @@ class VeritasBlazarFilter(AbsAlertFilter):
             
         # since it was detected only once, it might be an object with 
         # a large proper motion (i.e. solar system or closeby star)
-        if latest['ndethist'] < 2:
+        if latest['ndethist'] < self.min_ndet:
             self.logger.debug("rejected: only detected once")
             self.reason='one_time_detection'
             self.rejected_reason[latest['candid']] = self.reason
+            return None
+        
+        # check if it is at least as bright in one of the bands
+        
+        alert_filters = np.asarray(alert.get_values('fid'))
+        alert_magpsfs = np.asarray(alert.get_values('magpsf'))
+        keep_alert = False
+        for filt in np.unique(alert_filters):
+            average = np.median(alert_magpsfs[alert_filters==filt])
+            if alert_magpsfs[0] <= average:
+                keep_alert = True
+        if not keep_alert:
+            self.logger.debug("rejected: not enough photo points")
+            self.reason='not_brighter'
+            self.rejected_reason[latest['candid']]=self.reason
             return None
         
         # check for positional coincidence with gamma-ray blazars
@@ -195,7 +267,7 @@ class VeritasBlazarFilter(AbsAlertFilter):
                 latest['ra'], latest['dec'], rs_arcsec)
             if matchfound:
                 return self.on_match_t2_units
-            
+         
         self.logger.debug("rejected: not in catalogs")
         
         self.reason='not_in_catalogs'

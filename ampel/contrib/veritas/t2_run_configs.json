@@ -99,7 +99,7 @@
                                     "dec_key": "DEJ2000"
                                 },
                     "rs_arcsec": 3,
-                    "keys_to_append": ["ASSOC"]
+                    "keys_to_append": ["ASSOC","Redshift"]
                 },
                 "XRaySelBLL":{
                     "use": "extcats",
@@ -108,7 +108,52 @@
                                     "dec_key": "DEJ2000"
                                 },
                     "rs_arcsec": 3,
-                    "keys_to_append": ["ASSOC"]
+                    "keys_to_append": ["ASSOC","Redshift"]
+                },
+                "BeppoSAXblazars":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "RAJ2000",
+                                    "dec_key": "DEJ2000"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC","Redshift"]
+                },
+                "Plotkin10":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "RAJ2000",
+                                    "dec_key": "DEJ2000"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC","Redshift"]
+                },
+                "FRICAT":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "RAJ2000",
+                                    "dec_key": "DEJ2000"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC","Redshift"]
+                },
+                "FRIICAT":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "RAJ2000",
+                                    "dec_key": "DEJ2000"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC","Redshift"]
+                },
+                "MILLIQUAS":{
+                    "use": "extcats",
+                    "catq_kwargs": {
+                                    "ra_key": "RAJ2000",
+                                    "dec_key": "DEJ2000"
+                                },
+                    "rs_arcsec": 3,
+                    "keys_to_append": ["ASSOC","Redshift"]
                 }
             }
         }

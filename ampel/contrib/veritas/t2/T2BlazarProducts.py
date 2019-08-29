@@ -1,11 +1,26 @@
 from ampel.base.abstract.AbsT2Unit import AbsT2Unit
 import astropy.stats as astats
+from astropy.time import Time
+import datetime
 import logging
 import numpy as np
 import itertools
 
 
 # from ampel.abstract.AbsT2Unit import AbsT2Unit
+
+def numpy_to_std_types(dict_object):
+    # Convert everything back to std types to allow serialization
+    for item in dict_object:
+        if type(dict_object[item]) == np.ndarray:
+            dict_object[item] = dict_object[item].tolist()
+        elif type(dict_object[item]) == np.bool_:
+            dict_object[item] = bool(dict_object[item])
+        elif type(dict_object[item]) == np.float64:
+            dict_object[item] = float(dict_object[item])
+        elif type(dict_object[item]) == np.int:
+            dict_object[item] = int(dict_object[item])
+    return(dict_object)
 
 class T2BlazarProducts(AbsT2Unit):
     version = 1.0
@@ -31,13 +46,22 @@ class T2BlazarProducts(AbsT2Unit):
         super().__init__(logger)
         self.logger = logger if logger is not None else logging.getLogger()
         self.base_config = self.default_config if base_config is None else base_config
-        self.run_config = None
-        self.data_filter = {}
-        self.uls_filter = {}
         self.colordict = {1: 'g', 2: 'r', 3: 'i'}  # i is not really used
-        self.available_photom = []
-        self.available_colors = []
-        self.results = dict()
+        
+    def clear_results(self):
+        # Clear variables
+        self.run_config       = None
+        self.data_filter      = dict()
+        self.uls_filter       = dict()
+        self.results          = dict()
+        self.available_photom = list()
+        self.available_colors = list()
+
+    def get_current_and_future_jd(self):
+        #Get current julian date and next day/week
+        self.jd_now      = Time(datetime.datetime.now()).jd
+        self.jd_nextday  = self.jd_now+1
+        self.jd_nextweek = self.jd_now+7
 
     def classify_in_filters(self,light_curve):
         '''
@@ -46,13 +70,17 @@ class T2BlazarProducts(AbsT2Unit):
                              (ppo_list) and upper limits (ulo_list)
         :return: None (fills the available_color, data_filter and uls_filter properties)
         '''
-        self.colordict = {1: 'g', 2: 'r', 3: 'i'}  # i is not really used
-        self.data_filter = {}
         for item in light_curve.ppo_list:
             # item['mjd'] = item['jd']-2400000.5
             if item.get_value('fid') not in self.data_filter:
                 self.data_filter[item.get_value('fid')] = []
             self.data_filter[item.get_value('fid')].append(item.content)
+
+        for item in light_curve.ulo_list:
+            # item['mjd'] = item['jd']-2400000.5
+            if item.get_value('fid') not in self.uls_filter:
+                self.uls_filter[item.get_value('fid')] = []
+            self.uls_filter[item.get_value('fid')].append(item.content)
 
         self.available_bands = sorted(list(self.data_filter.keys()))
 
@@ -68,14 +96,17 @@ class T2BlazarProducts(AbsT2Unit):
         self.logger.info("Performing a polynomial fit of the data")
         if len(y) < 3:
             return (None, None)
-        poly, res = np.polyfit(x, y, 1, full=True)[0:2]
-        chisq_dof = (res / (len(x) - 2))[0]
-        for k in range(self.run_config['max_order']):
-            if len(y) > k + 3:
-                self.logger.debug("Trying poly({0}) shape".format(k + 2))
-                poly_new, res_new = np.polyfit(x, y, k + 2, full=True)[0:2]
+        poly, res = np.polyfit(x, y, 0, full=True)[0:2]
+        if res == None:
+            return (None, None)
+        
+        chisq_dof = (res / (len(x) - 1))[0]
+        for k in range(1,self.run_config['max_order']+1):
+            if len(y) > k + 2:
+                self.logger.debug("Trying poly({0}) shape".format(k))
+                poly_new, res_new = np.polyfit(x, y, k, full=True)[0:2]
                 if len(res_new) == 0: break
-                chisq_dof_new = (res_new / (len(x) - (k + 3)))[0]
+                chisq_dof_new = (res_new / (len(x) - (k + 1)))[0]
                 if chisq_dof_new < chisq_dof * 0.8:
                     poly, res = poly_new, res_new
                     chisq_dof = chisq_dof_new
@@ -94,6 +125,11 @@ class T2BlazarProducts(AbsT2Unit):
         x = np.asarray(x)
         y = np.asarray(y)
         yerr = np.asarray(yerr)
+        # just in case it is needed, remove repeated x-data
+        x,_indices = np.unique(x,return_index=True)
+        y = y[_indices]
+        yerr = yerr[_indices]
+
         # false alarm probability
         p0 = self.run_config['bblocks_p0']
         edges = astats.bayesian_blocks(x, y, yerr, fitness='measures', p0=p0)
@@ -117,44 +153,60 @@ class T2BlazarProducts(AbsT2Unit):
         :param color: photometric band (V, R)
         :return: dictionary containing photometry.
         '''
-        cthis = self.colordict[color]
-        self.logger.info("Photometry of filter {0}".format(cthis))
+        cfilt = self.colordict[color]   # current filter color
+        cdata = self.data_filter[color] # current filter data
+        self.logger.info("Photometry of filter {0}".format(cfilt))
         photresult = dict()
-        # cit   = itertools.cycle(self.data_filter[color])
-        cit = self.data_filter[color]
-        photresult['jds_val'] = np.asarray([item['jd'] for item in cit])
-        photresult['jds_err'] = np.asarray([0 for item in cit])
-        photresult['mag_val'] = np.asarray([item['magpsf'] for item in cit])
-        photresult['mag_err'] = np.asarray([item['sigmapsf'] for item in cit])
+        # Normal values
+        photresult['jds_val'] = np.asarray([item['jd'] for item in cdata])
+        photresult['jds_err'] = np.asarray([0 for item in cdata])
+        photresult['mag_val'] = np.asarray([item['magpsf'] for item in cdata])
+        photresult['mag_err'] = np.asarray([item['sigmapsf'] for item in cdata])
+
+        # Upper limits
+        try:             cdata = self.uls_filter[color]
+        except KeyError: cdata = []
+        photresult['uls_jds_val'] = np.asarray([item['jd'] for item in cdata])
+        photresult['uls_jds_err'] = np.asarray([0 for item in cdata])
+        photresult['uls_mag']      = np.asarray([item['diffmaglim'] for item in cdata])
+        
         photresult['quantity'] = 'mag'
-        photresult['label'] = 'phot_mag_{0}'.format(cthis)
+        photresult['label']    = 'phot_mag_{0}'.format(cfilt)
         # check if the source is becoming significantly brighter
-        mean_mag = np.mean(photresult['mag_val'][:-1])
-        mean_mag_err = np.std(photresult['mag_val'][:-1])
-        last_mag = photresult['mag_val'][-1]
+        mean_mag     = np.mean(photresult['mag_val'])
+        mean_mag_err = np.std(photresult['mag_val'])
+        last_mag     = photresult['mag_val'][-1]
         last_mag_err = photresult['mag_err'][-1]
-        # is_brighter  = last_mag+last_mag_err<mean_mag-mean_mag_err
-        is_brighter = int(last_mag + last_mag_err < mean_mag)
-        photresult['is_brighter'] = is_brighter
-        # Fit the trend by a polynomium of degree 2,3 or 4
-        # print('........ polyfit')
-        coef, chi2 = self.iterative_polymodelfit( \
-            x=photresult['jds_val'], y=photresult['mag_val'])
-        photresult['poly_coef'], photresult['poly_chi2'] = coef, chi2
         # Get the bayesian blocks
         photresult['bayesian_blocks'] = self.estimate_bayesian_blocks( \
             x=photresult['jds_val'],
             y=photresult['mag_val'],
             yerr=photresult['mag_err'])
+        # is_brighter  = last_mag+last_mag_err<mean_mag-mean_mag_err
+        is_brighter = int(last_mag + last_mag_err < mean_mag)
+        photresult['is_brighter'] = is_brighter
+        # Fit the trend by a polynomium of degree 2,3 or 4
+        coef, chi2 = self.iterative_polymodelfit(\
+            x=photresult['jds_val'], y=photresult['mag_val'])
+        if (coef is not None):
+            photresult['poly_coef'], photresult['poly_chi2'] = coef, chi2
+            polyfit = np.poly1d(photresult['poly_coef'])
+            photresult['trend_1d'] = \
+                polyfit(self.jd_nextday) < polyfit(self.jd_now)
+            photresult['trend_1w'] = \
+                polyfit(self.jd_nextweek) < polyfit(self.jd_now)
+        else:
+            photresult['trend_1d']    = False
+            photresult['trend_1w']    = False
+            photresult['is_brighter'] = False
 
-        # Convert everything back to lists to allow serialization
-        for item in photresult:
-            if type(photresult[item]) == np.ndarray:
-                photresult[item] = photresult[item].tolist()
+        # Convert everything back to std types to allow serialization
+        photresult = numpy_to_std_types(photresult)
 
         self.results[photresult['label']] = photresult
         if photresult['label'] not in self.available_photom:
             self.available_photom.append(photresult['label'])
+        
         return (photresult)
 
     def is_valid_pair_for_color(self, item1, item2, max_jdtimediff=1):
@@ -205,8 +257,9 @@ class T2BlazarProducts(AbsT2Unit):
                                 for (p1, p2) in zip(pairs[f1], pairs[f2])])
 
         # is it significantly bluer?
-        mean_color = np.mean(color_val[:-1])
-        last_color = color_val[-1]
+        mean_color     = np.mean(color_val)
+        mean_color_err = np.std(color_val)
+        last_color     = color_val[-1]
         last_color_err = color_err[-1]
 
         # return a dict with results
@@ -221,20 +274,32 @@ class T2BlazarProducts(AbsT2Unit):
         colorresult['color_err'] = color_err
         # fit to a polynom of 3rd degreee
         coef, chi2 = self.iterative_polymodelfit(x=jds_val, y=color_val)
-        colorresult['poly_coef'], colorresult['poly_chi2'] = coef, chi2
         # Get the bayesian blocks
         colorresult['bayesian_blocks'] = self.estimate_bayesian_blocks( \
             x=colorresult['jds_val'],
             y=colorresult['color_val'],
             yerr=colorresult['color_err'])
+        
+        # check the color w.r.t to historical values
+        if (coef is not None):
+            colorresult['poly_coef'], colorresult['poly_chi2'] = coef, chi2
+            polyfit = np.poly1d(colorresult['poly_coef'])
+            colorresult['trend_1d'] = \
+                polyfit(self.jd_nextday) < \
+                polyfit(self.jd_now)
+            colorresult['trend_1w'] = \
+                polyfit(self.jd_nextweek) < \
+                polyfit(self.jd_now)
+            # check the color
+            colorresult['is_bluer'] = last_color + last_color_err < mean_color
+        else:
+            colorresult['trend_1d'] = False
+            colorresult['trend_1w'] = False
+            colorresult['is_bluer'] = False
 
-        # Convert everything back to lists to allow serialization
-        for item in colorresult:
-            if type(colorresult[item]) == np.ndarray:
-                colorresult[item] = colorresult[item].tolist()
+        # Convert everything back to std types to allow serialization
+        colorresult = numpy_to_std_types(colorresult)
 
-        # check the color
-        colorresult['is_bluer'] = int(last_color + last_color_err < mean_color)
         self.results[colorresult['label']] = colorresult
         if colorresult['label'] not in self.available_colors:
             self.available_colors.append(colorresult['label'])
@@ -246,7 +311,7 @@ class T2BlazarProducts(AbsT2Unit):
         :return: None (fills the self.results['excitement'] property.
         '''
         # check variables to assess how exciting the alert is
-        max_score: float = 0.
+        max_score:  float = 0.
         excitement: float = 0.
         # Check for changes in color. If the source is becoming bluer,
         # it potentially means that the Sync. peak is moving to higher freqs.
@@ -255,19 +320,21 @@ class T2BlazarProducts(AbsT2Unit):
         # - Check if the last point is bluer than the average
         # - Check the trend (polyfit)
         # - TODO: additional test with the bayesian blocks??
-        for color in self.available_colors:
-            max_score += 1.
-            if self.results[color]['is_bluer'] is 1:
+        for color in  self.available_colors:
+            max_score += 4
+            if self.results[color]['is_bluer'] == True:
+                # Source is becoming bluer (Sync. peak moving to the right, promising).
                 excitement += 1
-            if self.results[color]['poly_coef'] is None: continue
-            if len(self.results[color]['poly_coef']) > 1:
-                max_score += 1.
-                if self.results[color]['poly_coef'][::-1][1] < 0:
+            if self.results[color]['trend_1w'] == True:
+                # Source is becoming bluer (Sync. peak moving to the right, promising).
+                excitement += 1
+            if self.results[color]['trend_1d'] == True:
+                # Source is becoming bluer (Sync. peak moving to the right, promising).
+                excitement += 1
+            bayesianblocks = self.results[color]['bayesian_blocks']
+            if len(bayesianblocks['x'])>1:
+                if bayesianblocks['y'][-1] < bayesianblocks['y'][-2]:
                     excitement += 1
-                    if len(self.results[color]['poly_coef']) > 2:
-                        if self.results[color]['poly_coef'][::-1][2] > 0:
-                            excitement -= 0.5
-
         # Check for changes in brightness in different filters.
         # Brighter potentially means more injected electrons -> enhanced SSC / EC emission.
         # Two ways:
@@ -275,20 +342,18 @@ class T2BlazarProducts(AbsT2Unit):
         # - Check the trend (polyfit)
         # - TODO: additional test with the bayesian blocks??
         for band in self.available_photom:
-            max_score += 1.
-            if self.results[band]['is_brighter'] is 1:
+            max_score += 4
+            if self.results[band]['is_brighter'] == True:
                 excitement += 1
-            if self.results[band]['poly_coef'] is None: continue
-            if len(self.results[band]['poly_coef']) > 1:
-                max_score += 1.
-                if self.results[band]['poly_coef'][1] < 0:
-                    # source is becoming brighter in the current band
+            if self.results[band]['trend_1w'] == True:
+                excitement += 1
+            if self.results[band]['trend_1d'] == True:
+                excitement += 1
+            bayesianblocks = self.results[band]['bayesian_blocks']
+            if len(bayesianblocks['x'])>1:
+                if bayesianblocks['y'][-1] < bayesianblocks['y'][-2]:
                     excitement += 1
-                    if len(self.results[band]['poly_coef']) > 2:
-                        # hold on, it is probably going down
-                        if self.results[band]['poly_coef'][2] > 0:
-                            excitement -= 0.5
-
+        
         self.results['excitement'] = excitement * 1. / max_score
 
         return(self.results['excitement'])
@@ -319,16 +384,18 @@ class T2BlazarProducts(AbsT2Unit):
                 EXCEPTION:     An exception occured
         """
 
+        self.clear_results()
         self.run_config = run_config if run_config is not None else self.base_config
         self.min_jd = np.min(light_curve.get_values('jd'))
         self.max_jd = np.max(light_curve.get_values('jd'))
         self.classify_in_filters(light_curve)
+        self.get_current_and_future_jd()
 
         for color in self.available_bands:
-            photresult = self.photometry_estimation(color)
+            self.photometry_estimation(color)
 
         for (color1, color2) in itertools.combinations(self.available_bands, 2):
-            colorresult = self.color_estimation(color1, color2, max_jdtimediff=1)
+            self.color_estimation(color1, color2, max_jdtimediff=1)
 
         self.estimate_excitement()
 
