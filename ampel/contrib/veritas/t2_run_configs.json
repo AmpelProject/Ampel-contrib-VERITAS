@@ -1,6 +1,6 @@
 {
-	"T2BLAZARPRODUTCS_dynamic": { 
-        "t2Unit": "T2BLAZARPRODUTCS",
+	"T2BLAZARPRODUCTS_dynamic": { 
+        "t2Unit": "T2BLAZARPRODUCTS",
         "runConfig": "dynamic",
         "author": "mireia.nievas-rosillo@desy.de",
         "version": 1.0,

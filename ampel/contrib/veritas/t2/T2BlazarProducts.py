@@ -46,6 +46,9 @@ class T2BlazarProducts(AbsT2Unit):
         super().__init__(logger)
         self.logger = logger if logger is not None else logging.getLogger()
         self.base_config = self.default_config if base_config is None else base_config
+        self.run_config = None
+        self.data_filter = {}
+        self.uls_filter = {}
         self.colordict = {1: 'g', 2: 'r', 3: 'i'}  # i is not really used
         
     def clear_results(self):
@@ -56,12 +59,26 @@ class T2BlazarProducts(AbsT2Unit):
         self.results          = dict()
         self.available_photom = list()
         self.available_colors = list()
-
+    
     def get_current_and_future_jd(self):
         #Get current julian date and next day/week
-        self.jd_now      = Time(datetime.datetime.now()).jd
+        self.jd_now      = self.max_jd #Time(datetime.datetime.now()).jd
         self.jd_nextday  = self.jd_now+1
         self.jd_nextweek = self.jd_now+7
+
+    @staticmethod
+    def get_unique_photopoints(light_curve, keys=['jd', 'fid'], score='rb'):
+        """
+        Return items uniquely identified by `keys`, resolving ties with `score`
+        """
+        ppo = {}
+        for item in light_curve.ppo_list:
+            key = tuple(item.get_value(k) for k in keys)
+            if (key not in ppo) or (not ppo[key].get_value(score) > item.get_value(score)):
+                ppo[key] = item
+        return ppo.values()
+
+    
 
     def classify_in_filters(self,light_curve):
         '''
@@ -70,7 +87,9 @@ class T2BlazarProducts(AbsT2Unit):
                              (ppo_list) and upper limits (ulo_list)
         :return: None (fills the available_color, data_filter and uls_filter properties)
         '''
-        for item in light_curve.ppo_list:
+        self.colordict = {1: 'g', 2: 'r', 3: 'i'}  # i is not really used
+        self.data_filter = {}
+        for item in self.get_unique_photopoints(light_curve):
             # item['mjd'] = item['jd']-2400000.5
             if item.get_value('fid') not in self.data_filter:
                 self.data_filter[item.get_value('fid')] = []
@@ -106,7 +125,7 @@ class T2BlazarProducts(AbsT2Unit):
                 self.logger.debug("Trying poly({0}) shape".format(k))
                 poly_new, res_new = np.polyfit(x, y, k, full=True)[0:2]
                 if len(res_new) == 0: break
-                chisq_dof_new = (res_new / (len(x) - (k + 1)))[0]
+                chisq_dof_new = (res_new / (len(x) - (k + 3)))[0]
                 if chisq_dof_new < chisq_dof * 0.8:
                     poly, res = poly_new, res_new
                     chisq_dof = chisq_dof_new
@@ -206,7 +225,6 @@ class T2BlazarProducts(AbsT2Unit):
         self.results[photresult['label']] = photresult
         if photresult['label'] not in self.available_photom:
             self.available_photom.append(photresult['label'])
-        
         return (photresult)
 
     def is_valid_pair_for_color(self, item1, item2, max_jdtimediff=1):
@@ -274,6 +292,7 @@ class T2BlazarProducts(AbsT2Unit):
         colorresult['color_err'] = color_err
         # fit to a polynom of 3rd degreee
         coef, chi2 = self.iterative_polymodelfit(x=jds_val, y=color_val)
+        colorresult['poly_coef'], colorresult['poly_chi2'] = coef, chi2
         # Get the bayesian blocks
         colorresult['bayesian_blocks'] = self.estimate_bayesian_blocks( \
             x=colorresult['jds_val'],
@@ -300,6 +319,8 @@ class T2BlazarProducts(AbsT2Unit):
         # Convert everything back to std types to allow serialization
         colorresult = numpy_to_std_types(colorresult)
 
+        # check the color
+        colorresult['is_bluer'] = int(last_color + last_color_err < mean_color)
         self.results[colorresult['label']] = colorresult
         if colorresult['label'] not in self.available_colors:
             self.available_colors.append(colorresult['label'])
@@ -335,6 +356,10 @@ class T2BlazarProducts(AbsT2Unit):
             if len(bayesianblocks['x'])>1:
                 if bayesianblocks['y'][-1] < bayesianblocks['y'][-2]:
                     excitement += 1
+                    if len(self.results[color]['poly_coef']) > 2:
+                        if self.results[color]['poly_coef'][::-1][2] > 0:
+                            excitement -= 0.5
+
         # Check for changes in brightness in different filters.
         # Brighter potentially means more injected electrons -> enhanced SSC / EC emission.
         # Two ways:
