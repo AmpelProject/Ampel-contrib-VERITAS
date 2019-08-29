@@ -32,14 +32,14 @@
 						"4LAC_lowlat": 20,
 						"3FHL": 20,
 						"4FGL": 20,
-						"2WHSP": 2,
+						"2WHSP": 3,
 						"RomaBZCAT": 2,
-						"XRaySelBLL": 2,
-						"Plotkin10": 2,
-						"BeppoSAXblazars": 5,
+						"XRaySelBLL": 3,
+						"Plotkin10": 3,
+						"BeppoSAXblazars": 3,
 						"FRICAT": 10,
 						"FRIICAT": 10,
-						"MILLIQUAS": 1
+						"MILLIQUAS": 2
 					}
 				}
 			},

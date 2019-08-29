@@ -3,7 +3,7 @@
         "t2Unit": "T2BLAZARPRODUCTS",
         "runConfig": "dynamic",
         "author": "mireia.nievas-rosillo@desy.de",
-        "version": 1.0,
+        "version": 1.1,
         "lastChange": "04.06.2019",
         "private": false,
         "parameters": {
@@ -16,7 +16,7 @@
         "t2Unit": "CATALOGMATCH",
         "runConfig": "vheblazars",
         "author": "mireia.nievas-rosillo@desy.de",
-        "version": 1.0,
+        "version": 1.1,
         "lastChange": "04.06.2019",
         "private": false,
         "parameters": {
@@ -27,7 +27,7 @@
                                     "ra_key": "RAJ2000",
                                     "dec_key": "DEJ2000"
                                 },
-                    "rs_arcsec": 20,
+                    "rs_arcsec": 40,
                     "keys_to_append": ["ASSOC"]
                 },
                 "4LAC":{
@@ -36,7 +36,7 @@
                       "ra_key": "RAJ2000",
                       "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 10,
+                    "rs_arcsec": 20,
                     "keys_to_append": [
                       "ASSOC1",
                       "Redshift",
@@ -50,7 +50,7 @@
                       "ra_key": "RAJ2000",
                       "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 10,
+                    "rs_arcsec": 20,
                     "keys_to_append": [
                       "ASSOC1",
                       "Redshift",
@@ -64,7 +64,7 @@
                     "ra_key": "RAJ2000",
                     "dec_key": "DEJ2000"
                   },
-                  "rs_arcsec": 10,
+                  "rs_arcsec": 20,
                   "keys_to_append": [
                     "ASSOC",
                     "Redshift",
@@ -77,7 +77,7 @@
                       "ra_key": "RAJ2000",
                       "dec_key": "DEJ2000"
                     },
-                    "rs_arcsec": 10,
+                    "rs_arcsec": 20,
                     "keys_to_append": [
                       "ASSOC1",
                       "CLASS"
@@ -134,7 +134,7 @@
                                     "ra_key": "RAJ2000",
                                     "dec_key": "DEJ2000"
                                 },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 10,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
                 "FRIICAT":{
@@ -143,7 +143,7 @@
                                     "ra_key": "RAJ2000",
                                     "dec_key": "DEJ2000"
                                 },
-                    "rs_arcsec": 3,
+                    "rs_arcsec": 10,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
                 "MILLIQUAS":{
