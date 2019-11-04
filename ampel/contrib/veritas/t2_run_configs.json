@@ -21,7 +21,7 @@
         "private": false,
         "parameters": {
             "catalogs": {
-                "GammaCAT":{
+                "VERITAS_BLAZARS:GammaCAT":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -30,7 +30,7 @@
                     "rs_arcsec": 40,
                     "keys_to_append": ["ASSOC"]
                 },
-                "4LAC":{
+                "VERITAS_BLAZARS:4LAC":{
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
@@ -44,7 +44,7 @@
                       "SED_class"
                     ]
                 },
-                "4LAC_lowlat":{
+                "VERITAS_BLAZARS:4LAC_lowlat":{
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
@@ -58,7 +58,7 @@
                       "SED_class"
                     ]
                 },
-                "3FHL": {
+                "VERITAS_BLAZARS:3FHL": {
                   "use": "extcats",
                   "catq_kwargs": {
                     "ra_key": "RAJ2000",
@@ -71,7 +71,7 @@
                     "CLASS"
                   ]
                 },
-                "4FGL":{
+                "VERITAS_BLAZARS:4FGL":{
                     "use": "extcats",
                     "catq_kwargs": {
                       "ra_key": "RAJ2000",
@@ -83,7 +83,7 @@
                       "CLASS"
                     ]
                 },
-                "2WHSP":{
+                "VERITAS_BLAZARS:2WHSP":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -92,7 +92,7 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC"]
                 },
-                "RomaBZCAT":{
+                "VERITAS_BLAZARS:RomaBZCAT":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -101,7 +101,7 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "XRaySelBLL":{
+                "VERITAS_BLAZARS:XRaySelBLL":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -110,7 +110,7 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "BeppoSAXblazars":{
+                "VERITAS_BLAZARS:BeppoSAXblazars":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -119,7 +119,7 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "Plotkin10":{
+                "VERITAS_BLAZARS:Plotkin10":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -128,7 +128,7 @@
                     "rs_arcsec": 3,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "FRICAT":{
+                "VERITAS_BLAZARS:FRICAT":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -137,7 +137,7 @@
                     "rs_arcsec": 10,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "FRIICAT":{
+                "VERITAS_BLAZARS:FRIICAT":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",
@@ -146,7 +146,7 @@
                     "rs_arcsec": 10,
                     "keys_to_append": ["ASSOC","Redshift"]
                 },
-                "MILLIQUAS":{
+                "VERITAS_BLAZARS:MILLIQUAS":{
                     "use": "extcats",
                     "catq_kwargs": {
                                     "ra_key": "RAJ2000",

@@ -49,19 +49,19 @@ class VeritasBlazarFilter(AbsAlertFilter):
         DIST_PSNR1      : float = 0.5     # distance to closest src of PS1 catalog.
         SGS_SCORE1      : float = 0.9     # how likely it is that src to be a star.
         CATALOGS_ARCSEC : dict  = {
-            "GammaCAT": 40,
-            "4LAC": 20,
-            "4LAC_lowlat": 20,
-            "3FHL": 20,
-            "4FGL": 20,
-            "2WHSP": 2,
-            "RomaBZCAT": 2,
-            "XRaySelBLL": 2,
-            "Plotkin10": 2,
-            "BeppoSAXblazars": 5,
-            "FRICAT": 10,
-            "FRIICAT": 10,
-            "MILLIQUAS": 1
+            "VERITAS_BLAZARS:GammaCAT": 40,
+            "VERITAS_BLAZARS:4LAC": 20,
+            "VERITAS_BLAZARS:4LAC_lowlat": 20,
+            "VERITAS_BLAZARS:3FHL": 20,
+            "VERITAS_BLAZARS:4FGL": 20,
+            "VERITAS_BLAZARS:2WHSP": 2,
+            "VERITAS_BLAZARS:RomaBZCAT": 2,
+            "VERITAS_BLAZARS:XRaySelBLL": 2,
+            "VERITAS_BLAZARS:Plotkin10": 2,
+            "VERITAS_BLAZARS:BeppoSAXblazars": 5,
+            "VERITAS_BLAZARS:FRICAT": 10,
+            "VERITAS_BLAZARS:FRIICAT": 10,
+            "VERITAS_BLAZARS:MILLIQUAS": 1
         }
 
     def __init__(self, on_match_t2_units, base_config=None, run_config=None, logger=None):

@@ -27,19 +27,19 @@
 					"DIST_PSNR1": 0.5,
 					"SGS_SCORE1": 0.95,
 					"CATALOGS_ARCSEC" : {
-						"GammaCAT": 40,
-						"4LAC": 20,
-						"4LAC_lowlat": 20,
-						"3FHL": 20,
-						"4FGL": 20,
-						"2WHSP": 3,
-						"RomaBZCAT": 2,
-						"XRaySelBLL": 3,
-						"Plotkin10": 3,
-						"BeppoSAXblazars": 3,
-						"FRICAT": 10,
-						"FRIICAT": 10,
-						"MILLIQUAS": 2
+						"VERITAS_BLAZARS:GammaCAT": 40,
+						"VERITAS_BLAZARS:4LAC": 20,
+						"VERITAS_BLAZARS:4LAC_lowlat": 20,
+						"VERITAS_BLAZARS:3FHL": 20,
+						"VERITAS_BLAZARS:4FGL": 20,
+						"VERITAS_BLAZARS:2WHSP": 3,
+						"VERITAS_BLAZARS:RomaBZCAT": 2,
+						"VERITAS_BLAZARS:XRaySelBLL": 3,
+						"VERITAS_BLAZARS:Plotkin10": 3,
+						"VERITAS_BLAZARS:BeppoSAXblazars": 3,
+						"VERITAS_BLAZARS:FRICAT": 10,
+						"VERITAS_BLAZARS:FRIICAT": 10,
+						"VERITAS_BLAZARS:MILLIQUAS": 2
 					}
 				}
 			},
