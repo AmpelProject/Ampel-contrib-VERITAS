@@ -112,7 +112,7 @@ class T2BlazarProducts(AbsT2Unit):
         self.run_config['max_order']
         :return: Returns best-fitting polynomial paramaters and the chi2.
         '''
-        self.logger.info("Performing a polynomial fit of the data")
+        self.logger.debug("Performing a polynomial fit of the data")
         if len(y) < 3:
             return (None, None)
         poly, res = np.polyfit(x, y, 0, full=True)[0:2]
@@ -174,7 +174,7 @@ class T2BlazarProducts(AbsT2Unit):
         '''
         cfilt = self.colordict[color]   # current filter color
         cdata = self.data_filter[color] # current filter data
-        self.logger.info("Photometry of filter {0}".format(cfilt))
+        self.logger.debug("Photometry of filter {0}".format(cfilt))
         photresult = dict()
         # Normal values
         photresult['jds_val'] = np.asarray([item['jd'] for item in cdata])
@@ -252,7 +252,7 @@ class T2BlazarProducts(AbsT2Unit):
         :return: dictionary containing the color photometry.
         '''
         cd1, cd2 = self.colordict[color1], self.colordict[color2]
-        self.logger.info("Color of ({0},{1})".format(cd1, cd2))
+        self.logger.debug("Color of ({0},{1})".format(cd1, cd2))
         colorresult = dict()
         f1, f2 = color1, color2
         df1, df2 = self.data_filter[f1], self.data_filter[f2]
